@@ -34,7 +34,7 @@ Inductive WFT (X : Set) : Set :=
 Fixpoint SecureBy (X:Set) (A : X->X->Prop) 
                     (p : WFT X) : Prop := 
  match p with 
- | ZT => forall x y, A x y
+ | ZT _ => forall x y, A x y
  | SUP p => 
      forall x, SecureBy (fun y z => A y z \/ A x y) (p x)
  end.
@@ -164,7 +164,7 @@ Qed.
 Fixpoint af_tree_iter (X:Set) (R : X -> X -> Prop) 
          (decR : dec_rel R) (x:X) (accX : Acc R x) :=
  match accX with 
- | Acc_intro f => SUP (fun y => 
+ | Acc_intro _ f => SUP (fun y => 
      match decR x y with 
        | left _ => ZT X 
        | right Ry => af_tree_iter decR (f y Ry) 
@@ -221,7 +221,7 @@ Corollary leq_af : almost_full le.
 unfold almost_full.
 cut (dec_rel lt). intro decLt.
 eexists (SUP (af_tree lt_wf decLt)).
- eapply sec_strengthen. Focus 2. apply secure_from_wf. Unfocus.
+ eapply sec_strengthen. Focus 2. apply secure_from_wf. 
 intros. firstorder. 
 unfold dec_rel. intros. destruct (le_lt_dec x y).
 firstorder. firstorder.
@@ -256,7 +256,7 @@ Lemma acc_from_af:
 (*=End *)
 intros X p. induction p.
 intros. simpl in H0. 
-apply Acc_intro. intros. edestruct (H _ y). 
+apply Acc_intro. intros. edestruct (H y0 y). 
 apply rt_refl. split. constructor 1. apply H1. apply H0.
 intros. 
 apply Acc_intro. intros z HT. 
@@ -302,8 +302,3 @@ unfold not in *. intros. apply IHclos_trans_1n. destruct H1.
 apply (H _ _ _ H4 H1). destruct H1.
 apply (H _ _ _ H4 H1). unfold not in H3. apply H3. apply H2. apply H0.
 Qed.
-
-
-
-
-

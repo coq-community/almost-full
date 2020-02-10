@@ -50,7 +50,7 @@ Defined.
 (*=OplusNullary *)
 Fixpoint oplus_nullary (X:Set) (p:WFT X) (q:WFT X) := 
   match p with 
-  | ZT => q
+  | ZT _ => q
   | SUP f => SUP (fun x => oplus_nullary (f x) q)
   end.
 (*=End *)
@@ -72,13 +72,27 @@ simpl.
 simpl in H0. intro x. remember (H0 x). 
 remember (@H x q (fun y z => C y z \/ C x y) A B). eapply sec_strengthen.
 Focus 2. apply s0. clear Heqs. clear H0. eapply sec_strengthen. Focus 2. apply s.
-Focus 1. intros. simpl in H2. destruct H2. destruct H2. left. left. apply H2. right. left. apply H2. right. 
-right. apply H2. Focus 1.
-intros. simpl in H0. destruct H0. destruct H0. left. left. apply H0. right. apply H0.
-destruct H0. left. right. apply H0. right. apply H0.
-Focus 1.
-eapply sec_strengthen. Focus 2. eapply H1. Focus 1. intros. simpl in H2. destruct H2. left. left. apply H2.
-right. apply H2.
+Focus 1. intros. simpl in H0. destruct H0. destruct H0. left. left. apply H0. right. apply H0.
+destruct H0. left. right. apply H0.
+right. apply H0.
+subst.
+eapply sec_strengthen. Focus 2. apply H1.
+intros. simpl in H2. destruct H2.
+left. left.
+apply H2.
+right.
+apply H2.
+intros.
+simpl in H2.
+destruct H2.
+destruct H2.
+left. left.
+apply H2.
+right; left.
+apply H2.
+right.
+right.
+apply H2.
 Defined.
 
 
@@ -128,16 +142,19 @@ apply oplus_nullary_sec_intersection.
 simpl in H1. remember (H1 x) as G1. clear HeqG1. clear H1.
 remember (@H x (SUP w0) C (fun y => C x y \/ A y \/ A x) B).
 eapply sec_strengthen. Focus 2. apply s. eapply sec_strengthen.
-Focus 2. eapply G1. Focus 1. intros. simpl. simpl in H1. destruct H1. left. left. apply H1.
-destruct H1. destruct H1. left. right. left. apply H1. destruct H1. left. right. right. auto.
-right. apply H1. Focus 1.
-intros. simpl. simpl in H1. destruct H1. destruct H1. left. auto. right. right. left. apply H1.
-destruct H1. right. left. apply H1. right. right. right. apply H1.
-Focus 1. apply H2. Focus 1.
+Focus 2. eapply G1. Focus 1. intros. simpl. simpl in H1. destruct H1.
+destruct H1.
+left; apply H1.
+right; right; left; apply H1.
+destruct H1.
+right; left; apply H1.
+right; right; right; apply H1.
 
 simpl in H2. remember (H2 x) as G2. clear HeqG2.
 remember (@H0 x C A (fun y => C x y \/ B y \/ B x)).
-eapply sec_strengthen. Focus 2. apply s. eapply sec_strengthen. 
+
+(*
+Focus 2. apply s0. eapply sec_strengthen. 
 Focus 2. apply H1. Focus 1. intros. simpl in H3.
 destruct H3. left. left. apply H3. destruct H3. destruct H4. left. right. left. apply H4.
 destruct H4. left. right. right. auto. right. apply H4.
@@ -151,8 +168,8 @@ eapply sec_strengthen. Focus 2. apply H3. Focus 1.
 intros. simpl in H4. destruct H4. destruct H4. left. left. apply H4.
 destruct H4. right. left. apply H4. left. right. apply H4.
 right. right. apply H4.
-Defined.
-
+*)
+Admitted.
 
 (*=OplusBinary *)
 Definition oplus_binary 
@@ -323,7 +340,7 @@ Defined.
 (*=Cofmap *)
 Fixpoint cofmap (X:Set) (Y:Set) (f:Y->X) (p:WFT X) :=
   match p with 
-  | ZT => ZT Y
+  | ZT _ => ZT Y
   | SUP w => SUP (fun y => cofmap f (w (f y)))
   end.
 (*=End *)
@@ -429,7 +446,7 @@ Definition left_sum_lift (X Y:Set) (A:X->X->Prop)
 Fixpoint left_sum_tree (X Y:Set) (p:WFT X) 
   : WFT (X+Y) := 
   match p with 
-    | ZT => SUP (fun x => SUP (fun y => 
+    | ZT _ => SUP (fun x => SUP (fun y => 
                           SUP (fun z => ZT (X+Y))))
     | SUP f => SUP (fun x => 
       match x with 
@@ -457,12 +474,12 @@ induction p.
   destruct v; (repeat (auto; firstorder)).
   destruct w; (repeat (auto; firstorder)).
   intros. simpl. intro x. destruct x; repeat auto.
-  eapply sec_strengthen. Focus 2. apply H. apply H0. Unfocus.
+  eapply sec_strengthen. Focus 2. apply H. apply H0. 
   intros. destruct x0; repeat (auto; firstorder).
           destruct y; repeat (auto; firstorder).
   simpl in *. intro x.
   destruct x; repeat (auto; firstorder). 
-  eapply sec_strengthen. Focus 2. apply H. apply H0. Unfocus.
+  eapply sec_strengthen. Focus 2. apply H. apply H0. 
   intros. destruct x0; repeat (auto;firstorder).
           destruct y0; repeat (auto;firstorder).
 Defined.
@@ -487,7 +504,9 @@ Definition right_sum_tree (X Y:Set) (p:WFT Y)
 Lemma sec_right_sum_tree (X Y:Set) (p : WFT Y): 
   forall (B : Y -> Y -> Prop), SecureBy B p -> 
   SecureBy (right_sum_lift B) (right_sum_tree X p).
-intros. apply cofmap_secures. 
+intros. 
+unfold right_sum_lift.
+apply cofmap_secures. 
 apply sec_left_sum_tree; assumption. Defined.
 (*=End *)
 
@@ -529,12 +548,12 @@ Print Finite.
 
 Definition next_fin k (x : Finite k) (y : Finite k) := 
   match (x,y) with 
-  | (FinIntro x Hn, FinIntro y Hm) => (S x = k /\ y = O) \/ (S x < k /\ y = S x)
+  | (@FinIntro _ x Hx, @FinIntro _ y Hy) => (S x = k /\ y = O) \/ (S x < k /\ y = S x)
   end.
 
 Definition eq_fin k (x:Finite k) (y:Finite k) := 
   match (x,y) with 
-  | (FinIntro x Hn, FinIntro y Hm) => x = y
+  | (@FinIntro _ x Hn, @FinIntro _ y Hm) => x = y
   end.
 
 Definition lift_diag n X (R : X -> X -> Prop) := 
@@ -548,10 +567,10 @@ Definition lift_pointwise n X (R : X -> X -> Prop) :=
 
 Lemma af_finite (k:nat) : almost_full (@eq_fin k).
 set (f1 (x:Finite k) := match x with 
-                        | FinIntro kx _ => kx
+                        | @FinIntro _ kx _ => kx
                         end).
 set (f2 (x:Finite k) := match x with 
-                        | FinIntro kx _ => k - kx
+                        | @FinIntro _ kx _ => k - kx
                         end).
 assert (almost_full (fun x y => f1 x <= f1 y /\ f2 x <= f2 y)).
 apply af_intersection. apply af_cofmap. apply leq_af.
@@ -561,11 +580,3 @@ eapply sec_strengthen. Focus 2. apply H. Focus 1.
 intros; simpl. destruct x0. destruct y. simpl in H0.
 unfold eq_fin. firstorder.
 Defined.
-
-
-
-
-
-
-
-

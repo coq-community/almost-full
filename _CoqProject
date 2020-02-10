@@ -1,0 +1,7 @@
+-R theories/Default AlmostFull.Default
+
+theories/Default/AFConstructions.v
+theories/Default/AFExamples.v
+theories/Default/AlmostFullInduction.v
+theories/Default/AlmostFull.v
+theories/Default/Terminator.v

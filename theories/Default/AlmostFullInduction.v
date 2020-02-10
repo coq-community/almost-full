@@ -55,9 +55,11 @@ refine (fun x =>
   match x as w return (forall y, y < w -> nat) -> nat with 
     | O => fun frec => 1
     | 1 => fun frec => 1
-    | (S (S x)) => fun frec => frec (S x) _ + frec x _
+    | (S (S x)) => fun frec => (frec (S x) _  + frec x _)%nat
   end); firstorder.
 Defined.
+
+Print fib.
 (*=End *)
 
 Eval compute in (fib 0). (* 1 *) 
@@ -109,11 +111,11 @@ refine (@FinIntro k (plus_mod_aux k n x0) _). apply plus_mod_aux_fin. apply H.
 Defined.
 
 Lemma plus_mod_lt (m:nat): 
-  forall k n, m+n < k -> plus_mod_aux k m n = m+n.
+  forall k n, m+n < k -> plus_mod_aux k m n = (m+n)%nat.
 induction m. firstorder. intros. simpl. 
 remember (k - S n) as j. 
 destruct j. firstorder. firstorder. simpl. 
-assert (S (m + n) = m + (S n)). Focus 2. rewrite H0. apply IHm. firstorder. Unfocus.
+assert (S (m + n) = (m + (S n))%nat). Focus 2. rewrite H0. apply IHm. firstorder. 
 firstorder. Defined.
 
 Lemma plus_mod_gt (m:nat): 
@@ -124,7 +126,7 @@ intros.
 simpl. remember (k - S x) as diff. destruct diff.
 destruct k. firstorder. simpl. 
 assert (x = k). firstorder. subst x.
-assert (plus_mod_aux (S k) m O = m + O). apply plus_mod_lt. firstorder.
+assert (plus_mod_aux (S k) m O = (m + O)%nat). apply plus_mod_lt. firstorder.
 rewrite H3. firstorder.
 destruct k. firstorder.
 assert (plus_mod_aux (S k) m (S x) = m + (S x) - (S k)).
@@ -139,7 +141,7 @@ destruct (le_lt_dec k (m+x)).
 assert (plus_mod_aux k m x = m + x - k). 
 apply plus_mod_gt. omega. omega. omega. omega.
 rewrite H3. omega.
-assert (plus_mod_aux k m x = m + x). apply plus_mod_lt. omega. 
+assert (plus_mod_aux k m x = (m + x)%nat). apply plus_mod_lt. omega. 
 rewrite H3. omega.
 Defined.
 
@@ -150,20 +152,20 @@ induction m. firstorder. intros. simpl.
 remember (n + S m - (S (n + x))) as diff.
 destruct diff. firstorder. 
 assert (m = x). firstorder. rewrite H1.
-assert (plus_mod_aux (n + S x) x O = x + O). apply plus_mod_lt. firstorder.
+assert (plus_mod_aux (n + S x) x O = (x + O)%nat). apply plus_mod_lt. firstorder.
 firstorder. 
 simpl.
 assert (plus_mod_aux (S n + m) m (S n + x) = x).
 apply IHm. firstorder. firstorder. firstorder. 
-assert (S n + m = n + S m). firstorder. rewrite <- H2.
-assert (S (n+x) = S n + x). firstorder. rewrite H3. apply H1.
+assert ((S n + m)%nat = (n + S m)%nat). firstorder. rewrite <- H2.
+assert (S (n+x) = (S n + x)%nat). firstorder. rewrite H3. apply H1.
 Defined.
 
 Lemma plus_mod_suc m: 
  forall x, x < m -> 
      plus_mod_aux (S m) m (S x) = x.
-intros. assert (S m = 1 + m). firstorder. rewrite H0. 
-assert (S x = 1 + x). firstorder. rewrite H1. apply plus_mod_wraparound. firstorder.
+intros. assert (S m = (1 + m)%nat). firstorder. rewrite H0. 
+assert (S x = (1 + x)%nat). firstorder. rewrite H1. apply plus_mod_wraparound. firstorder.
 firstorder.
 Defined.
 
@@ -235,7 +237,6 @@ eapply ct_from_ctr. Focus 2. apply H2. Unfocus.
 Focus 2. 
 constructor 1.
 subst k. simpl. exists (snd y). split. destruct H. apply H4. apply H1.
-Unfocus.
 destruct x as ((kx,Hx),x).
 destruct y as ((ky,Hy),y).
 destruct z as ((kz,Hz),z).
@@ -244,7 +245,7 @@ unfold plus_mod. simpl. unfold eq_fin. unfold fst in HEqfin.
 unfold plus_mod in HEqfin. unfold eq_fin in HEqfin. subst kz. subst k. 
 unfold lift_diag in H. unfold fst in H. unfold snd in H. unfold next_fin in H.
 simpl in H. destruct H. destruct H. destruct H. subst ky. inversion H.
-assert (plus_mod_aux (S m) m O = m + O). apply plus_mod_lt. firstorder.
+assert (plus_mod_aux (S m) m O = (m + O)%nat). apply plus_mod_lt. firstorder.
 rewrite H4. auto. destruct H. subst ky. 
 apply plus_mod_suc. firstorder. 
   (* No wraparound needed here *)
@@ -253,7 +254,6 @@ exists (S m). split.  firstorder.
 split. Focus 2. right. split. firstorder. 
 exists x0. split. simpl. exists (snd y). split. destruct H. apply H3.
 apply H1. apply H2.
-Unfocus.
 
 destruct x as ((kx,Hx),x).
 destruct y as ((ky,Hy),y).
@@ -318,7 +318,7 @@ unfold lift_diag. unfold fst. unfold snd. split. unfold next_fin.
 apply H2. apply H4. apply CTxy.
 destruct (diag_pow_decomp_mod kGt H). simpl in H0.
 destruct H0. left. split. apply H0. unfold eq_fin in H1. apply H1.
-unfold eq_fin in H0. unfold fst in H0. right. apply H0. Unfocus.
+unfold eq_fin in H0. unfold fst in H0. right. apply H0. 
 firstorder.
 (* Functional requirement *)
 intros. destruct x as ((kx,Hx),x). unfold snd.
@@ -351,7 +351,7 @@ Lemma af_power_induction:
 intros.
 destruct (le_lt_dec k 1). assert (k = 1); firstorder. 
 apply af_induction with (T := T) (R := R). apply H0. 
-intros. eapply H1. split. Focus 2. destruct H4. apply H5. Unfocus.
+intros. eapply H1. split. Focus 2. destruct H4. apply r. 
 subst k. simpl. 
 destruct H4. clear H4 H H1 l. induction H3. constructor. exists y. auto.
 constructor 2 with (y := y). exists y. auto. auto.
