@@ -133,43 +133,55 @@ simpl in H2. destruct H2. destruct H2. destruct (H1 x y). left. left. apply H2. 
 destruct (H1 x0 y). left. left. apply H3. left. right. split. apply H2. apply H3.
 destruct (H1 x x0). right. left. apply H3. destruct H2. right. left. apply H2. right. right. auto.
 Focus 1.
-intros. 
+intros.
 rewrite oplus_unary_sup_sup. rewrite sup_rewrite.
-intro x. 
+intro x.
 assert (SecureBy (fun y z => (C y z \/ C x y \/ A y /\ B y) \/ (A x /\ B x)) 
            (oplus_nullary (oplus_unary (w x) (SUP w0)) (oplus_unary (SUP w) (w0 x)))).
-apply oplus_nullary_sec_intersection. 
+apply oplus_nullary_sec_intersection.
 simpl in H1. remember (H1 x) as G1. clear HeqG1. clear H1.
 remember (@H x (SUP w0) C (fun y => C x y \/ A y \/ A x) B).
 eapply sec_strengthen. Focus 2. apply s. eapply sec_strengthen.
-Focus 2. eapply G1. Focus 1. intros. simpl. simpl in H1. destruct H1.
-destruct H1.
+Focus 2. eapply G1. Focus 1. intros. simpl in H1.
+destruct H1. destruct H1.
 left; apply H1.
 right; right; left; apply H1.
-destruct H1.
-right; left; apply H1.
+destruct H1. right; left; apply H1.
 right; right; right; apply H1.
+Focus 1. apply H2. Focus 1.
+intros.
+destruct H1.
+left; left; auto.
+destruct H1.
+destruct H1.
+left; right; left; auto.
+destruct H1.
+left; right; right; auto.
+right; auto.
 
 simpl in H2. remember (H2 x) as G2. clear HeqG2.
 remember (@H0 x C A (fun y => C x y \/ B y \/ B x)).
-
-(*
-Focus 2. apply s0. eapply sec_strengthen. 
-Focus 2. apply H1. Focus 1. intros. simpl in H3.
-destruct H3. left. left. apply H3. destruct H3. destruct H4. left. right. left. apply H4.
-destruct H4. left. right. right. auto. right. apply H4.
-Focus 1. intros. simpl. simpl in H3. auto. Focus 1.
+eapply sec_strengthen. Focus 2. apply s. eapply sec_strengthen.
+Focus 2. apply H1. Focus 1. intros. simpl in H3. auto.
 eapply sec_strengthen. Focus 2. eapply G2. Focus 1.
+
 intros. simpl in H3. destruct H3. destruct H3. left. apply H3. right.
 right. left. apply H3. destruct H3. right. left. apply H3. right.
-right. right. apply H3. Focus 1.
+right. right. apply H3. Focus 2.
 
 eapply sec_strengthen. Focus 2. apply H3. Focus 1.
 intros. simpl in H4. destruct H4. destruct H4. left. left. apply H4.
 destruct H4. right. left. apply H4. left. right. apply H4.
 right. right. apply H4.
-*)
-Admitted.
+
+intros. destruct H3.
+left; left; auto.
+destruct H3; destruct H4.
+left; right; left; auto.
+destruct H4.
+left; right; right; auto.
+right; auto.
+Qed.
 
 (*=OplusBinary *)
 Definition oplus_binary 
