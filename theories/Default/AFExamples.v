@@ -6,9 +6,9 @@ Require Import List.
 Require Import Relations.
 Require Import Logic.
 
-Require Import AlmostFull.
-Require Import AlmostFullInduction.
-Require Import AFConstructions.
+From AlmostFull.Default Require Import AlmostFull.
+From AlmostFull.Default Require Import AlmostFullInduction.
+From AlmostFull.Default Require Import AFConstructions.
 
 Set Implicit Arguments.
 Unset Strict Implicit.

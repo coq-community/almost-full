@@ -1,4 +1,4 @@
--R theories/Default AlmostFull.Default
+-Q theories AlmostFull
 
 theories/Default/AFConstructions.v
 theories/Default/AFExamples.v

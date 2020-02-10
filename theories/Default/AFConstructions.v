@@ -6,7 +6,7 @@ Require Import List.
 Require Import Relations.
 Require Import Logic.
 
-Require Import AlmostFull.
+From AlmostFull.Default Require Import AlmostFull.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
