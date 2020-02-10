@@ -8,7 +8,7 @@ Require Import Logic.
 
 Require Import List.
 
-Require Import AlmostFull.
+From AlmostFull.PropBounded Require Import AlmostFull.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -49,7 +49,7 @@ Inductive WFT (X:Set) :=
    
 Fixpoint Arity (X:Set) (p : WFT X) (A : LRel X) := 
   match p with 
-  | ZT    => (forall ys, A ys <-> A nil)
+  | ZT _    => (forall ys, A ys <-> A nil)
   | SUP w => (forall x, Arity (w x) (fun ys => A (x::ys)))
     end. 
 (*=End *)
@@ -142,7 +142,7 @@ induction p.
      apply H5.
      Focus 3.
      intros. destruct H8. destruct H8. left. left. auto. destruct H8. right. left. auto.
-     left. right; auto. right. auto. Unfocus.
+     left. right; auto. right. auto. 
      auto. auto.
 Defined.
 

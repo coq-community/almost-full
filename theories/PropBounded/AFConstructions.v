@@ -6,7 +6,7 @@ Require Import List.
 Require Import Relations.
 Require Import Logic.
 
-Require Import AlmostFull.
+From AlmostFull.PropBounded Require Import AlmostFull.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -320,7 +320,7 @@ Definition right_sum_lift (X Y:Set) (B:Y->Y->Prop) (x y:X+Y) :=
 (*=SecRightSumTree *)			      
 Lemma af_right_sum (X Y : Set) (B : Y -> Y -> Prop) : 
   @almost_full Y B -> @almost_full (X+Y) (right_sum_lift B).
-intros. eapply af_cofmap. apply af_left_sum. apply H.
+intros. unfold right_sum_lift. eapply af_cofmap. apply af_left_sum. apply H.
 Defined.
 (*=End *)
 
@@ -346,12 +346,12 @@ Print Finite.
 
 Definition next_fin k (x : Finite k) (y : Finite k) := 
   match (x,y) with 
-  | (FinIntro x Hn, FinIntro y Hm) => (S x = k /\ y = O) \/ (S x < k /\ y = S x)
+  | (@FinIntro _ x Hn, @FinIntro _ y Hm) => (S x = k /\ y = O) \/ (S x < k /\ y = S x)
   end.
 
 Definition eq_fin k (x:Finite k) (y:Finite k) := 
   match (x,y) with 
-  | (FinIntro x Hn, FinIntro y Hm) => x = y
+  | (@FinIntro _ x Hn, @FinIntro _ y Hm) => x = y
   end.
 
 Definition lift_diag n X (R : X -> X -> Prop) := 
@@ -373,10 +373,10 @@ Defined.
 
 Lemma af_finite (k:nat) : almost_full (@eq_fin k).
 set (f1 (x:Finite k) := match x with 
-                        | FinIntro kx _ => kx
+                        | @FinIntro _ kx _ => kx
                         end).
 set (f2 (x:Finite k) := match x with 
-                        | FinIntro kx _ => k - kx
+                        | @FinIntro _ kx _ => k - kx
                         end).
 assert (almost_full (fun x y => f1 x <= f1 y /\ f2 x <= f2 y)).
 apply af_intersection. apply af_cofmap. apply leq_af.

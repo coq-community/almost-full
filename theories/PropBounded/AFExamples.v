@@ -6,9 +6,9 @@ Require Import List.
 Require Import Relations.
 Require Import Logic.
 
-Require Import AlmostFull.
-Require Import AlmostFullInduction.
-Require Import AFConstructions.
+From AlmostFull.PropBounded Require Import AlmostFull.
+From AlmostFull.PropBounded Require Import AlmostFullInduction.
+From AlmostFull.PropBounded Require Import AFConstructions.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -37,7 +37,7 @@ firstorder.
 refine (fun x => match x as w return (forall y, T y w -> nat) -> nat with 
                    | (O,_) => fun frec => 1
                    | (_,O) => fun frec => 1 
-                   | (S a,S b) => fun frec => @frec (a,S (S b)) _ + @frec (S a,b) _
+                   | (S a,S b) => fun frec => (@frec (a,S (S b)) _ + @frec (S a,b) _)%nat
                  end); unfold T in *; auto with arith.
 Defined.
 
@@ -62,7 +62,7 @@ induction CT; firstorder. firstorder.
 refine (fun x => match x as w return (forall y, T y w -> nat) -> nat with 
                    | (O,_) => fun frec => 1
                    | (_,O) => fun frec => 1 
-                   | (S a,S b) => fun frec => @frec (S b,b) _ + @frec (a,a) _
+                   | (S a,S b) => fun frec => (@frec (S b,b) _ + @frec (a,a) _)%nat
                  end); unfold T in *; auto with arith.
 Defined.
 
@@ -80,8 +80,8 @@ Definition flip1 : forall (x:nat*nat), nat.
 pose (T x y := fst x <= snd y /\ snd x < fst y).
 pose (R x y := fst x + snd x <= fst y + snd y).
 apply af_induction with (T := T) (R := R).
-(* prove almost_full *) 
-apply af_cofmap. apply leq_af.
+(* prove almost_full *)
+apply af_cofmap with (f := fun z => (fst z + snd z)%nat). apply leq_af.
 (* prove intersection emptyness *)
 intros x y (CT,H).
 assert (fst x + snd x < fst y + snd y). clear H.
@@ -156,7 +156,8 @@ Lemma T2_invariant:
     snd x < snd y /\ fst x < snd y \/ 
     fst x < fst y /\ snd x < snd y.
 intros x y T2.
-destruct T2 as (z,(Txz,(z0,(Tzz0,Zeq)))). unfold T in *. 
+destruct T2 as (z,(Txz,(z0,(Tzz0,Zeq)))). unfold T in *.
+simpl in Zeq.
 destruct Txz as [T1 | T2]; destruct Tzz0 as [S1 | S2]; subst z0.
   right; left; firstorder.
   left; firstorder.
@@ -202,7 +203,7 @@ refine (fun x => match x as w
          return (forall y, T y w -> nat) -> nat with
          | (O,_) => fun frec => 1
          | (_,O) => fun frec => 1 
-         | (S x, S y) => fun frec => frec (S y, y) _ + frec (S y, x) _
+         | (S x, S y) => fun frec => (frec (S y, y) _ + frec (S y, x) _)%nat
                 end).
 unfold T in *. left. simpl; omega.
 unfold T in *. right. simpl; omega.
@@ -225,7 +226,6 @@ destruct HR. firstorder.
 destruct H. destruct H.
 destruct (T2_ct_invariant H0). firstorder.
 firstorder.
-Unfocus.
 clear HR.
 induction CT. left; auto.
 destruct IHCT. right. left. constructor. exists y. auto. split. apply H. 
@@ -254,7 +254,7 @@ refine (fun x => match x as w
          return (forall y, T y w -> nat) -> nat with
          | (O,_) => fun frec => 1
          | (_,O) => fun frec => 1 
-         | (S x, S y) => fun frec => frec (S y, y) _ + frec (S y, x) _
+         | (S x, S y) => fun frec => (frec (S y, y) _ + frec (S y, x) _)%nat
                 end).
 unfold T in *. left. simpl; omega.
 unfold T in *. right. simpl; omega.
@@ -267,7 +267,7 @@ Section SumExample.
 
 (*=FSumRelations *)
 Definition Tfsum := fun x y => 
-   (exists x0, x = inr nat (x0+2) /\ y = inl nat (S x0)) \/ 
+   (exists x0, x = inr nat (x0+2)%nat /\ y = inl nat (S x0)) \/ 
    (exists x0, x = inl nat (x0-2) /\ y = inr nat x0).
 Definition Rfsum := sum_lift le le.
 (*=End *)
@@ -275,33 +275,146 @@ Definition Rfsum := sum_lift le le.
 Lemma fsum_pow2_empty:
    forall x y : nat + nat,
    clos_trans_1n (nat + nat) (power 2 Tfsum) x y /\ Rfsum y x -> False.
-intros. 
+intros.
 destruct H.
-induction H. destruct H. destruct H. destruct H1. destruct H1. subst x1.
-destruct H. destruct H. destruct H. subst x. subst x0.
-destruct y. destruct H0.
-destruct H1. destruct H. destruct H. inversion H.
-destruct H. destruct H. inversion H1. unfold Rfsum in H0. unfold sum_lift in H0.
-inversion H1. inversion H. firstorder.
-destruct H. destruct H. subst x. subst x0. destruct y.
-unfold Rfsum in H0. unfold sum_lift in H0. 
-destruct H1. destruct H. destruct H. inversion H. inversion H1. firstorder.
-destruct H. destruct H. inversion H.
-destruct H0.
-destruct H. destruct H. destruct H2. destruct H2. subst x1.
-destruct H. destruct H. destruct H. subst x. subst x0.
-destruct z. destruct H0. destruct y.
-unfold Rfsum in H0. unfold sum_lift in H0. destruct H2.
-destruct H. destruct H. inversion H. destruct H. destruct H. inversion H2.
-destruct H2. destruct H. destruct H. inversion H.
-destruct H. destruct H. inversion H. inversion H2. 
-unfold Rfsum in H0. unfold sum_lift in H0. apply IHclos_trans_1n.
-unfold Rfsum; unfold sum_lift. firstorder.
-destruct H. destruct H. subst x. subst x0. destruct H2.
-destruct H. destruct H. subst y. inversion H. destruct z.
-apply IHclos_trans_1n. unfold Rfsum in *. unfold sum_lift in *. firstorder.
-unfold Rfsum in *. unfold sum_lift in *. destruct H0.
-destruct H. destruct H. inversion H.
+induction H.
+- destruct H. destruct H. destruct H1. destruct H1.
+  destruct H. destruct H. destruct H. subst x. subst x0.
+  destruct y. destruct H0.
+  destruct H1. destruct H. destruct H. inversion H.
+  destruct H. destruct H. inversion H1. unfold Rfsum in H0. unfold sum_lift in H0.
+  inversion H.
+  subst.
+  inversion H2.
+  subst.
+  firstorder.
+  unfold Rfsum in H0. unfold sum_lift in H0.
+ destruct H1. destruct H. destruct H. destruct H1. subst.
+ destruct y; auto.
+ destruct H1.
+ subst.
+ inversion H.
+ subst.
+ simpl in H2.
+ inversion H2.
+ subst.
+ firstorder.
+ destruct H1.
+ destruct H1.
+ simpl in H2.
+ destruct y.
+ subst.
+ inversion H2.
+ destruct x; auto.
+ subst.
+ destruct H.
+ destruct H.
+ inversion H.
+- unfold Rfsum in *. unfold sum_lift in *.
+  clear H1.
+  destruct z.
+  * destruct x; auto.    
+    destruct y; subst.
+    + inversion H.
+      destruct H1.
+      inversion H2.
+      destruct H3.
+      inversion H4.
+      subst.
+      clear H2 H4.
+      inversion H3.
+      destruct H2.
+      destruct H2.
+      subst.
+      inversion H4.
+      subst.
+      inversion H1.
+      destruct H2.
+      destruct H2.
+      inversion H5.
+      destruct H2.
+      destruct H2.
+      inversion H5.
+      subst.
+      inversion H2.
+      subst.
+      firstorder.
+      destruct H2.
+      destruct H2.
+      subst.
+      inversion H4.
+   + firstorder.
+     subst.
+     inversion H4.
+     subst.
+     inversion H4.
+     subst.
+     inversion H.
+     subst.
+     inversion H2.
+     subst.
+     inversion H4.
+     inversion H.
+     subst.
+     inversion H.
+     subst.
+     inversion H4.
+   * destruct x; auto.
+     destruct y; subst.
+    + inversion H.
+      destruct H1.
+      inversion H2.
+      destruct H3.
+      inversion H4.
+      subst.
+      clear H2 H4.
+      inversion H3.
+      destruct H2.
+      destruct H2.
+      subst.
+      inversion H4.
+      subst.
+      inversion H1.
+      destruct H2.
+      destruct H2.
+      inversion H5.
+      destruct H2.
+      destruct H2.
+      inversion H5.
+      subst.
+      inversion H2.
+      subst.
+      destruct H2.
+      destruct H2.      
+      subst.
+      inversion H4.
+   + destruct H.
+     destruct H.
+     inversion H1.
+     destruct H2.
+     inversion H3.
+     subst.
+     clear H1 H3.
+     inversion H; clear H.
+     destruct H1.
+     destruct H.
+     subst.
+     inversion H.
+     subst.
+     clear H.
+     inversion H2; clear H2.
+     destruct H.
+     destruct H.
+     inversion H.
+     destruct H.     
+     destruct H.
+     inversion H.
+     inversion H1.
+     subst.
+     firstorder.
+     destruct H1.
+     destruct H.
+     inversion H.
 Defined.
 
 
@@ -322,11 +435,11 @@ apply fsum_pow2_empty.
 refine (fun x => match x as w 
         return (forall y, Tfsum y w -> nat) -> nat with 
         | inl O => fun frec => 1
-        | inl (S x) => fun frec => frec (inr nat (x+2)) _
+        | inl (S x) => fun frec => frec (inr nat (x+2)%nat) _
         | inr x => fun frec => frec (inl nat (x-2)) _ 
         end).
-left. exists x0. intuition.
-right. exists x0. intuition.
+left. exists x. intuition.
+right. exists x. intuition.
 Defined.
 (*=End *)
 
@@ -348,7 +461,7 @@ Definition SA := fun x y  => y = S (S x).
 Definition funny_compare := fun x y => 
   match (x,y) with 
   | (inl x, inl y) => x < y
-  | (inr x, inl y) => x <= y \/ x = y+1
+  | (inr x, inl y) => x <= y \/ x = (y+1)%nat
   | (inl x, inr y) => x + 2 <= y
   | (inr x, inr y) => x <= y
   end.
@@ -405,7 +518,7 @@ unfold TB in *; firstorder.
 (* give the functionals *)
   refine (fun x => match x as w return (forall y, TA y w -> nat) -> (forall y, SB y w -> nat) -> nat with 
                     | O   => fun self_rec other_rec => 1 
-                    | S x => fun self_rec other_rec => @self_rec x _ + @other_rec (S (S x)) _
+                    | S x => fun self_rec other_rec => (@self_rec x _ + @other_rec (S (S x)) _)%nat
                    end). firstorder. unfold TA. firstorder. unfold SB. auto.
   refine (fun x => match x as w return (forall y, TB y w -> nat) -> (forall y, SA y w -> nat) -> nat with 
                     | O       => fun self_rec other_rec => 1

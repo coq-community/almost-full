@@ -5,3 +5,9 @@ theories/Default/AFExamples.v
 theories/Default/AlmostFullInduction.v
 theories/Default/AlmostFull.v
 theories/Default/Terminator.v
+theories/PropBounded/AFConstructions.v
+theories/PropBounded/AFExamples.v
+theories/PropBounded/AlmostFullInduction.v
+theories/PropBounded/AlmostFull.v
+theories/PropBounded/AlmostFullGeneralized.v
+theories/PropBounded/Terminator.v
