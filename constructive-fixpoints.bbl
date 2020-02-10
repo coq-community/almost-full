@@ -1,0 +1,185 @@
+\begin{thebibliography}{10}
+
+\bibitem{abel:tlca03}
+Andreas Abel.
+\newblock Termination and guardedness checking with continuous types.
+\newblock In M.~Hofmann, editor, {\em Typed Lambda Calculi and Applications
+  (TLCA 2003), Valencia, Spain}, volume 2701 of {\em Lecture Notes in Computer
+  Science}, pages 1--15. Springer-Verlag, June 2003.
+
+\bibitem{Ben-amram02generalsize-change}
+Amir~M. Ben-Amram.
+\newblock General size-change termination and lexicographic descent.
+\newblock In {\em The Essence of Computation: Complexity, Analysis,
+  Transformation. Essays Dedicated to Neil D. Jones, volume 2566 of Lecture
+  Notes in Computer Science}, pages 3--17. Springer-Verlag, 2002.
+
+\bibitem{berghofer-higman}
+Stefan Berghofer.
+\newblock A constructive proof of {Higman}'s {Lemma} in {Isabelle}.
+\newblock In {\em TYPES}, pages 66--82, 2003.
+
+\bibitem{coqart}
+Yves Bertot and Pierre Cast\'eran.
+\newblock {\em Interactive Theorem Proving and Program Development. Coq'Art:
+  The Calculus of Inductive Constructions}.
+\newblock Texts in Theoretical Computer Science. Springer Verlag, 2004.
+
+\bibitem{bove-capretta}
+Ana Bove and Venanzio Capretta.
+\newblock Modelling general recursion in type theory.
+\newblock {\em Mathematical. Structures in Comp. Sci.}, 15:671--708, August
+  2005.
+
+\bibitem{chargueraud-10-fix}
+Arthur Chargu{\'e}raud.
+\newblock The optimal fixed point combinator.
+\newblock In Matt Kaufmann and Lawrence~C. Paulson, editors, {\em Proceeding of
+  the first international conference on {Interactive} {Theorem} {Proving}
+  ({ITP})}, volume 6172 of {\em LNCS}, pages 195--210. Springer, 2010.
+
+\bibitem{terminator}
+Byron Cook, Andreas Podelski, and Andrey Rybalchenko.
+\newblock Termination proofs for systems code.
+\newblock In {\em Proceedings of the 2006 ACM SIGPLAN conference on Programming
+  language design and implementation}, PLDI '06, pages 415--426, New York, NY,
+  USA, 2006. ACM.
+
+\bibitem{Coquand:1994:ART:185268.185270}
+Thierry Coquand.
+\newblock An analysis of {Ramsey}'s {Theorem}.
+\newblock {\em Inf. Comput.}, 110:297--304, May 1994.
+
+\bibitem{coquand-short}
+Thierry Coquand.
+\newblock A direct proof of {Ramsey}'s {Theorem}.
+\newblock Unpublished note, available from
+  \url{http://www.chalmers.se/~coquand/intuitionism.html}, 2010.
+
+\bibitem{Fridlender97higmanslemma}
+Daniel Fridlender.
+\newblock {Higman}'s {Lemma} in {Type} {Theory}.
+\newblock In {\em Proceedings of the 1996 Workshop on Types for Proofs and
+  Programs}, pages 112--133. Springer-Verlag, 1997.
+
+\bibitem{Heizmann+:sct-disjinv}
+Matthias Heizmann, Neil~D. Jones, and Andreas Podelski.
+\newblock Size-change termination and transition invariants.
+\newblock In {\em Proceedings of the 17th international conference on Static
+  analysis}, SAS'10, pages 22--50, Berlin, Heidelberg, 2010. Springer-Verlag.
+
+\bibitem{jones-bohr}
+Neil~D. Jones and Nina Bohr.
+\newblock Call-by-value termination in the untyped lambda-calculus.
+\newblock {\em Logical Methods in Computer Science}, 4(1), 2008.
+
+\bibitem{kraus+:fix}
+A.~Krauss, C.~Sternagel, R.~Thiemann, C.~Fuhs, and J.~Giesl.
+\newblock Termination of {Isabelle} functions via termination of rewriting.
+\newblock In {\em Proceeding of the second international conference on
+  Interactive Theorem Proving ({ITP})}, 2011.
+
+\bibitem{Krauss07}
+Alexander Krauss.
+\newblock Certified size-change termination.
+\newblock In Frank Pfenning, editor, {\em CADE}, volume 4603 of {\em Lecture
+  Notes in Computer Science}, pages 460--475. Springer, 2007.
+
+\bibitem{krauss-function}
+Alexander Krauss.
+\newblock Partial and nested recursive function definitions in higher-order
+  logic.
+\newblock {\em Journal of Automated Reasoning}, 44:303--336, 2010.
+\newblock 10.1007/s10817-009-9157-2.
+
+\bibitem{TreeTheorem}
+JB~Kruskal.
+\newblock {Well-quasi-ordering, the Tree Theorem, and Vazsonyi's conjecture}.
+\newblock {\em Trans. Amer. Math. Soc}, 95:210--225, 1960.
+
+\bibitem{Lee+:sct}
+Chin~Soon Lee, Neil~D. Jones, and Amir~M. Ben-Amram.
+\newblock The size-change principle for program termination.
+\newblock In {\em Proceedings of the 28th ACM SIGPLAN-SIGACT symposium on
+  Principles of programming languages}, POPL '01, pages 81--92, New York, NY,
+  USA, 2001. ACM.
+
+\bibitem{leuschel-wqos}
+Michael Leuschel.
+\newblock The essence of computation.
+\newblock chapter Homeomorphic embedding for online termination of symbolic
+  methods, pages 379--403. Springer-Verlag, New York, NY, USA, 2002.
+
+\bibitem{Megacz:coinductive-monad}
+Adam Megacz.
+\newblock A coinductive monad for {Prop}-bounded recursion.
+\newblock In Aaron Stump and Hongwei Xi, editors, {\em Proceedings of the {ACM}
+  Workshop Programming Languages meets Program Verification, {PLPV} 2007},
+  pages 11--20, New York, NY, USA, 2007. ACM.
+
+\bibitem{OnWellQuasiOrderingFiniteTrees}
+Crispin~S.J.A. Nash-Williams.
+\newblock {On well-quasi-ordering finite trees}.
+\newblock In {\em Mathematical Proceedings of the Cambridge Philosophical
+  Society}, volume~59, pages 833--835. Cambridge Univ Press, 1963.
+
+\bibitem{norell:thesis}
+Ulf Norell.
+\newblock {\em Towards a practical programming language based on dependent type
+  theory}.
+\newblock PhD thesis, Department of Computer Science and Engineering, Chalmers
+  University of Technology, SE-412 96 G\"{o}teborg, Sweden, September 2007.
+
+\bibitem{podelski-rybalchenko:transition}
+Andreas Podelski and Andrey Rybalchenko.
+\newblock Transition invariants.
+\newblock In {\em Proceedings of the 19th Annual IEEE Symposium on Logic in
+  Computer Science}, pages 32--41, Washington, DC, USA, 2004. IEEE Computer
+  Society.
+
+\bibitem{wqo-sets}
+F.~Richman and G.~Stolzenberg.
+\newblock Well-quasi-ordered sets.
+\newblock {\em Advanced Mathematics}, pages 145--193, 1993.
+
+\bibitem{Seisenberger}
+Monika Seisenberger.
+\newblock An inductive version of {Nash-Williams}' minimal-bad-sequence
+  argument for {Higman}'s {Lemma}.
+\newblock In {\em Selected papers from the International Workshop on Types for
+  Proofs and Programs}, TYPES '00, pages 233--242, London, UK, 2002.
+  Springer-Verlag.
+
+\bibitem{Sereni}
+Damien Sereni.
+\newblock Termination analysis and call graph construction for higher-order
+  functional programs.
+\newblock In {\em Proceedings of the 12th ACM SIGPLAN international conference
+  on Functional programming}, ICFP '07, pages 71--84, New York, NY, USA, 2007.
+  ACM.
+
+\bibitem{Sorensen95analgorithm}
+Morten~H. S{\o}rensen and Robert Gl{\"u}ck.
+\newblock An algorithm of generalization in positive supercompilation.
+\newblock In {\em Proceedings of ILPS'95, the International Logic Programming
+  Symposium}, pages 465--479. MIT Press, 1995.
+
+\bibitem{Sozeau06subsetcoercions}
+Matthieu Sozeau.
+\newblock Subset coercions in {Coq}.
+\newblock In {\em In Selected papers from the International Workshop on Types
+  for Proofs and Programs (TYPES’06}, pages 237--252. Springer, 2006.
+
+\bibitem{sozeau-rewrite}
+Matthieu Sozeau.
+\newblock {A New Look at Generalized Rewriting in Type Theory}.
+\newblock {\em Journal of Formalized Reasoning}, 2(1):41--62, December 2009.
+
+\bibitem{Veldman01041993}
+Wim Veldman and Marc Bezem.
+\newblock Ramsey's theorem and the pigeonhole principle in intuitionistic
+  mathematics.
+\newblock {\em Journal of the London Mathematical Society}, s2-47(2):193--211,
+  1993.
+
+\end{thebibliography}

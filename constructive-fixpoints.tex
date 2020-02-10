@@ -1,0 +1,1362 @@
+\documentclass{llncs} 
+%\usepackage{MnSymbol}
+\usepackage{amsmath, amssymb,amsfonts,mathrsfs,stmaryrd}
+\usepackage{bussproofs,xspace}
+\usepackage[x11names]{xcolor}
+\usepackage{multicol}
+\input{listingstuff}
+
+
+\usepackage{mdwlist}
+\usepackage{float}
+\usepackage{url}
+\usepackage{prooftree}
+
+%\bibliographystyle{plain}
+\setlength{\parskip}{0.35\baselineskip plus 0.2\baselineskip minus 0.1\baselineskip}
+\setlength{\parsep}{\parskip}
+\setlength{\topsep}{0cm}
+\setlength{\parindent}{0cm}
+
+\usepackage{pgf}
+\usepackage{tikz}
+\floatstyle{boxed}
+\restylefloat{figure}
+
+\usepgflibrary{shapes.geometric}
+\usepgflibrary{shapes.misc}
+\usetikzlibrary{shapes.geometric}
+\usetikzlibrary{shapes.misc}
+
+%% \newtheorem{lemma}{Lemma}
+%% \newtheorem{corollary}{Corollary}
+%% \newtheorem{proposition}{Proposition}
+%% \newtheorem{theorem}{Theorem}
+
+%% \theoremstyle{definition}
+%% \newtheorem{example}{Example}
+
+%% \newtheorem{definition}{Definition}
+%% \newenvironment{proof}[1][Proof]{\begin{trivlist}
+%% \item[\hskip \labelsep {\bfseries #1}]}{\hfill$\Box$\end{trivlist}}
+
+
+\newcommand{\dv}[1]{{\color{red}{\bf DV:} #1}} 
+
+%% \renewcommand{\dv}[1]{}
+
+\lstset{morecomment=[l][\color{Green4}]{>}}
+
+
+\newcommand{\finpath}{\rightsquigarrow} 
+
+\newcommand{\todo}[1]{{\color{red}{#1}}}
+
+\bibliographystyle{plain}
+\begin{document}
+
+%% \conferenceinfo{ICFP'10,} {September 27--29, 2010, Baltimore, Maryland, USA.}
+%% \CopyrightYear{2010}
+%% \copyrightdata{978-1-60558-794-3/10/09} 
+
+
+\title{Stop when you are Almost-Full}
+\subtitle{Adventures in constructive termination}
+
+%% \authorinfo{}{}{}
+\author{Dimitrios Vytiniotis\inst{1} and Thierry Coquand\inst{2}}
+\institute{Microsoft Research, Cambridge \\
+\email{dimitris@microsoft.com}
+\and
+University of Gothenburg \\
+\email{coquand@chalmers.se}}
+
+\maketitle
+
+\begin{abstract}
+
+Disjunctive well-foundedness (used in Terminator), size-change 
+termination, and well-quasi-orders (used in supercompilation and 
+term-rewrite systems) are examples of techniques that have been 
+successfully applied to automatic proofs of program termination and online termination
+testing, respectively. Although these works originate in different
+communities, there is an intimate connection between them -- they rely
+on closely related principles and both employ similar arguments from
+Ramsey theory. At the same time there is a notable absence of these
+techniques in programming systems based on constructive type
+theory. In this paper we'd like to highlight the aforementioned
+connection and make the core ideas widely accessible to theoreticians
+and Coq programmers, by offering a Coq development which culminates in
+some novel tools for performing induction. The benefit is nice
+composability properties of termination arguments at the cost of
+intuitive and lightweight user obligations. Inevitably, we have to
+present some Ramsey-like arguments: Though similar proofs are
+typically classical, we offer an entirely constructive development
+standing on the shoulders of Veldman and Bezem, and Richman and Stolzenberg.
+
+%% online termination testing with well-quasi-orders have successfully
+%% been applied to automatic termination 
+
+%% In the recent years the so-called {\em disjunctive invariants} method
+%% has proven to be an extremely successful approach to automatic proofs
+%% of program termination, leading to industrial-strength tools such as
+%% Terminator. {\em Size-change} termination is another (related) extremely
+%% effective methodology for automatic program termination. In the core of both works lies an argument from 
+%% Ramsey theory.
+
+%% Furthermore, research on online termination testing and
+%% supercompilation has for a while been using termination testing
+%% criteria for function inlining based on {\em well-quasi-orders}, often
+%% employing Ramsey-like arguments to form more complex termination
+%% testing criteria from simpler ones.
+
+%% There is an intimate connection between these worlds, and a notable absense
+%% of similar techniques in Coq. In this article we'd like to highlight that
+%% connection and make the core ideas widely accessible to theoreticians and 
+%% Coq programmers, by offering a Coq development which culminates in some new 
+%% variations of induction principles. Inevitably, we have to present some 
+%% Ramsey-like arguments: Though similar proofs are typically classical, we 
+%% offer an entirely constructive development standing on the shoulders of Veldman 
+%% and Bezem, and Coquand.
+
+\end{abstract}
+
+
+\newcommand{\qa}[2]{\\[-14pt]{\color{Green4} \item {#1}} {\color{blue} #2}}
+\newcommand{\qanocr}[2]{\color{Green4}{#1} \color{blue}{#2}}
+\newcommand{\bools}{\mathbb{B}} 
+\newcommand{\nats}{\mathbb{N}} 
+\newcommand{\ints}{\mathbb{Z}}
+\newcommand{\finints}[1]{\mathbb{Z}_{#1}}
+\newcommand{\intrange}[2]{\{{#1}..{#2}\}}
+\newcommand{\intsge}[1]{\{{#1}..\}}
+\newcommand{\unitty}{\mathbf{1}}
+\newcommand{\voidty}{\mathbf{0}}
+\newcommand{\rats}{\mathbb{Q}}
+\newcommand{\enc}{\mathit{enc}} \newcommand{\dec}{\mathit{dec}}
+\newcommand{\app}{\oplus}
+\newcommand{\pref}{\sqsubseteq}
+\newcommand{\map}{\mathit{map}}
+\newcommand{\inv}{\mathit{inv}}
+\newcommand{\id}{\mathit{id}}
+
+%% \category{D.1.1}{Programming Techniques}   
+%%                 {Applicative (Functional) Programming}
+%% \category{D.3.3}{Programming Languages}
+%%                 {Language Constructs and Features} 
+%% \category{E.4}{CODING AND INFORMATION THEORY}
+%%               [Data compaction and compression]
+
+%% \terms
+%% Design, Languages, Theory
+
+%\keywords
+%games, encoders, decoders 
+
+ 
+\section{Introduction}\label{s:intro}
+
+
+\dv{Must make shorter and tighten}
+Program termination has always been an exciting subject among researchers, dating 
+back to the early days of computing. The reason is because program termination is at 
+the same time {\em important} for software reliability, and {\em difficult} for general 
+classes of programs. Despite the difficulties, however, several research communities 
+have managed to make good progress.
+
+Over the recent years, the so-called {\em transition invariants}~\cite{podelski-rybalchenko:transition}
+method has been an extremely successful approach for automatic 
+proofs of program termination, leading to industrial-strength
+tools, such as Terminator~\cite{terminator}. {\em Size-change 
+termination} (SCT) ~\cite{Lee+:sct,jones-bohr,Sereni} is another very successful methodology
+for automatic proofs of program termination. 
+In the core of both works lies a formal argument from Ramsey theory~\cite{Heizmann+:sct-disjinv}.
+
+Furthermore, research on online termination testing~\cite{leuschel-wqos} and 
+supercompilation~\cite{Sorensen95analgorithm} has for a while been using termination 
+testing criteria for function reductions and inlining based on {\em well-quasi-orders}, often 
+employing Ramsey-like arguments to form more complex termination testing criteria from simpler ones. 
+
+There is an intimate connection between these worlds, and a notable absence of similar techniques
+to help programmers {\em prove} the termination or totality of their fixpoint definitions in Coq and -- more 
+generally -- in systems based on constructive type theory. To quote some recent work on size-change termination
+for Isabelle~\cite{Krauss07}:
+\begin{quote}
+{\em ``Our proof uses classical logic, including the (infinite, but countable) axiom of choice. It would be interesting to investigate if the proof can be modified to work in a weaker framework''}
+\end{quote}
+
+In this paper we'd like to highlight the connection between these previous works and make the core ideas widely 
+accessible to theoreticians and Coq programmers, by offering 
+a Coq development which introduces some novel variations of induction principles. Inevitably, we have 
+to present some Ramsey-like arguments: Though similar proofs are typically classical, we offer a 
+constructive development in the footsteps of Veldman and Bezem~\cite{Veldman01041993,coquand-short},
+and Richman and Stolzenberg~\cite{wqo-sets}.
+
+Specifically, our contributions with this paper are:
+\begin{itemize}
+  \item We introduce a novel mechanism for type-based termination, 
+        that of {\em almost-full} relations (Section~\ref{sect:af}), which is a weaker
+        version of the more traditional well-quasi-orders, originating in intuitionistic mathematics.
+
+  \item We formally explain the connection between almost-full relations and 
+        well-founded relations (Section~\ref{sect:wf-to-af}), and prove a new induction 
+        theorem based on almost-full relations. (Section~\ref{sect:af-to-wf})
+
+  \item We demonstrate that, unlike well-founded relations, almost-full relations 
+        compose nicely to form other almost-full relations (Section~\ref{sect:af-constructions}).
+        In this context, of particular interest is a construction which constitutes 
+        a contribution on its own: a short proof of (the constructive version 
+        of) Ramsey's theorem (for binary relations). We give examples of composing almost-full
+        relations to show termination. Thanks to the composability of almost-full relations, the
+        user obligations from the new induction principles typically involve intuitive (and amenable to automation) 
+        relation inclusion lemmas instead of proofs about accessibility predicates. 
+
+  \item We can use our method to show examples from SCT that go beyond 
+        simple lexicographic orders (Section~\ref{sect:af-in-practice}). We show that the SCT
+        principle can be intuitionistically proved from our induction principle.
+
+%%        \dv{Maybe connect the discussion paragraph about SCT to this example.} 
+
+%% an extension of our induction principle (called AF power-induction) that allows 
+%%         us to show more complicated examples, closer in spirit to {\em size-change} termination, 
+%%         for which simple lexicographic orders just do not work. (Section~\ref{sect:af-in-practice}).
+
+  \item Connecting our work with further work on automatic termination proofs, we 
+        show how the almost-full induction principle can be instantiated to derive the 
+        Terminator rule (which is based on the so-called {\em disjunctive well-foundedness}).
+        (Section~\ref{sect:terminator}) 
+
+  \item We generalize our proof of Ramsey's theorem to relations of transfinite arities, and offer an elegant and simpler proof of this theorem
+        than older attempts \cite{Coquand:1994:ART:185268.185270,Fridlender97higmanslemma}. We show how our simpler statement of Ramsey's theorem
+        for binary relations follows from the generalized version. We also carefully explain the differences compared to related work 
+       (Section~\ref{sect:generalized-irt}) \dv{Must add section!}
+
+ \item We briefly discuss mutual induction principles. (Section~\ref{sect:mutual})
+
+\end{itemize}
+
+We finally present related work (Section~\ref{sect:related}), and outline 
+further directions for research. (Section~\ref{sect:future}).
+
+Our accompanying development does not make use of any ``non-standard'' axioms 
+in Coq (such as classical facts, proof-irrelevance, or even the more benign functional extensionality). 
+It builds under Coq 8.3pl2. 
+%% \begin{center}\footnotesize
+%%    \url{http://research.microsoft.com/people/dimitris/cfp.tgz}
+%% \end{center}
+
+The new induction principles proposed in this paper
+are not-necessarily more expressive or easier to use than 
+other (particularly recent~\cite{chargueraud-10-fix,kraus+:fix,sozeau-rewrite}) related work -- this 
+is a topic that deserves further investigation, engineering, and potentially automation 
+support. On the other hand,  the induction principles that we propose here are 
+quite amenable to the same automation that made Terminator and SCT successful and quite pleasant to use due to 
+the composability of almost-full relations and the nature of the user obligations that arise. Apart from contributing to Coq's large arsenal
+of 
+techniques for recursion~\cite{coqart,bove-capretta,Megacz:coinductive-monad,sozeau-rewrite,chargueraud-10-fix}, the 
+other significant contribution of this article is to bring together ideas from different research communities 
+in a type-theoretic framework. 
+
+\section{Well-quasi-orders and almost-full relations}\label{sect:af}
+
+The starting point for this exploration will be {\em online termination testing}.
+Online termination testing is concerned with the following problem: Assume that we monitor the execution 
+of a program by means of observing the state or the arguments passed down in recursive calls; can we raise
+an error as soon as we detect that the program might be diverging? The requirement for a sound termination tester
+is that we {\em must} raise an error if the program is indeed divergent. Conversely, we can't expect in general to raise 
+an error {\em only} if the program is divergent but we'd like our online termination tester to be as lenient as possible.
+
+Assume now that the observed state of a program forms a sequence of values $s_1,s_2,\ldots$ -- in effect we'd 
+like to detect if that sequence $s$ could be infinite. There is a very natural mathematical definition that
+can help us here, and that is the notion of a {\em well-quasi-order} (WQO):
+
+\vspace{5pt}\begin{definition}[Well-quasi-order]
+For some set \lstinline|X|, a binary relation $\preceq$ of type \lstinline|X -> X -> Prop| is a well quasi order 
+if (i) it is transitive and (ii) for every infinite sequence $s$ of elements of \lstinline|X| it is the 
+case that there exist $i$ and $j$ with $i < j$ such that $s_i \preceq s_j$. 
+\end{definition}
+
+Why is this helpful? Consider the following online termination tester which accepts a user-provided 
+WQO $\preceq$ as input: We will keep a record of all previous values we have observed and every time a new 
+value $s_{new}$ appears, we will check if for some old value $s_{old}$ it is $s_{old} \preceq s_{new}$. If this is true then we will 
+raise an error, otherwise we will record $s_{new}$ in our history and wait for the next value. Now, 
+if the sequence was infinite then we definitely know that we will raise an error at some point (because
+$\preceq$ is a WQO). Of course, conservatively, we might raise an error even when the sequence is not infinite
+because the WQO provided was too conservative. 
+
+Let us demonstrate this with an example. On the type \lstinline|nat|, the relation $\leq$ (\lstinline|le| in Coq) 
+is a WQO: Think of any infinite sequence of natural numbers -- at some point we will meet a natural number 
+which is greater or equal than some previous one. Hence, our online termination tester would raise an error 
+for the following sequence: 
+\[ 10,7,6,4,1,5,4,3,3,3,\ldots \] 
+as soon as it encountered the element $5$, since $4 \leq 5$. Of course, if the sequence 
+is actually finite (e.g. it ends after a hundred $3$ values) then, too bad: our WQO 
+has been too conservative and we should have used a more lenient one.
+
+The merits of WQOs for online termination testing have been discussed in
+previous work~\cite{leuschel-wqos} so we will not go into 
+details here. Their main advantage is that they can form extremely lenient termination 
+tests by combining simpler WQOs (at the cost of having to record big portions of history).
+
+
+\subsection{Almost-full relations}\label{ssect:af}
+
+The mechanism described above is by now well-established for online termination 
+testing, so it is quite natural to ask how it would look in type theory and check
+if it can be used to {\em prove} termination, in addition to testing for termination.
+
+Surprisingly, it turns out that a certain kind of relations that satisfy property (ii) in the 
+definition of WQOs have been proposed by mathematicians in an entirely different 
+domain: the development of an intuitionistic version of Ramsey 
+theory~\cite{Veldman01041993}. These are the {\em almost-full} (AF) relations (term coined by Wim Veldman), 
+and for the rest of this paper we will focus on {\em binary} AF relations.
+
+An AF relation is an {\em inductive} characterization of relations that satisfy 
+property (ii) above: 
+\inputcoq{AlmostFull}{AF}
+Assume that we know that a relation \lstinline|R| satisfies 
+\lstinline|almost_full R|. If the proof object is built from the 
+\lstinline|AF_ZT| constructor then we know that any two elements in an infinite sequence they will be related. If on the other hand the proof object is
+built from the \lstinline|AF_SUP| constructor then, if we receive a first
+element \lstinline|x| in a sequence then we know that 
+\lstinline|almost_full (fun y z => R y z \/ R x y)|. 
+This means that in any infinite
+sequence that starts with \lstinline|x|, either there exist two elements in the rest of the sequence related by \lstinline|R| itself, or
+some element which is related to the first element \lstinline|x|.
+
+%% \inputcoq{AlmostFull}{WFT}
+
+%% An instructive way to understand a well-founded tree is as a set of winning strategies in a game. At each point either 
+%% the game has finished and we won (\lstinline|ZT|) or (in the case of \lstinline|SUP|) the opponent can provide a next 
+%% value of type \lstinline|X| and we are asked to come up with a next move. Because the tree is inductive, all 
+%% such ``moves'' end up in a winning position. 
+
+%% But, the winning strategies of which game exactly does a well-founded tree represent? Well, we wrote before 
+%% that we are interested in relations for which every infinite sequence contains two values that are related. 
+%% Let us define when a well-founded tree of type \lstinline|WFT X| ``secures'' a binary 
+%% relation \lstinline|A : X -> X -> Prop|: 
+%% \inputcoq{AlmostFull}{SecureBy}
+%% Now if we know that \lstinline|SecureBy R p| and the tree \lstinline|p| is \lstinline|ZT| then all 
+%% elements of the domain \lstinline|X| are related, and hence the tree is a witness that 
+%% every infinite sequence has two related elements. If the tree is \lstinline|SUP p| then, when presented with 
+%% a new value \lstinline|x|, either \lstinline|x| {\em itself} is related to some future element \lstinline|y|, or we have
+%% to keep going to find the two related elements in the future. This explains the relation \lstinline|fun y z => A y z \/ A x y|
+%% used in the recursive call. Because \lstinline|p| is inductive, we cannot go on for ever. In the leaves we will have established 
+%% that some values along the way were related by \lstinline|A|!
+
+%% This leads to the definition of an AF relation, namely one that is ``secured'' in the way 
+%% we have defined by some well-founded tree:
+%% \inputcoq{AlmostFull}{AlmostFull}
+
+Based on these intuitions we may prove condition (ii) of the definition of
+WQOs: 
+%% We can now prove condition (ii) of the definition of WQOs: 
+%% \inputcoq{AlmostFull}{InfiniteChain}
+%% The sketch of the proof is based on the discussion above. We use function \lstinline|f| as 
+%% an infinite sequence. Imagine a cursor at point \lstinline|k| of the infinite sequence. Then 
+%% we have two cases: Either the current tree is \lstinline|ZT| in which case we can simply
+%% take the elements at positions \lstinline|k| and \lstinline|k+1|, or the tree is \lstinline|SUP p|. 
+%% In the latter case, by induction, we are guaranteed to find two related elements in the future, 
+%% or an element which is related to the element in position \lstinline|k|. In both cases we are done!
+%% As a corollary: 
+\inputcoq{AlmostFull}{InfiniteChainCorollary}
+It is interesting to observe that corollary \lstinline|af_inf_chain| is quite analogous to 
+the ``no infinite descending chain'' property which can be proved intuitionistically 
+from Coq's inductive definition of well-founded relations (based on accessibility predicates)~\cite{coqart}.
+The converse of \lstinline|af_inf_chain| holds classically but Veldman and Bezem~\cite{Veldman01041993} show 
+that there exists a recursive counterexample and so does not hold in type theory. \dv{Thierry, is this true? One reviewer asked about this.}
+This makes it impossible to use property (ii) as the very defining property of 
+AF relations (instead of our inductive characterization) because that alternative definition
+cannot be used for induction (see Theorem~\lstinline|wf_from_af| in Section~\ref{sect:af-to-wf}).
+
+Notice also that we've stopped worrying about the transitivity condition -- indeed we are not going to need it!
+Some of the proofs in later parts of the paper would be simpler 
+(and they are, in related work~\cite{OnWellQuasiOrderingFiniteTrees}) but essentially 
+all interesting properties of WQOs can be proved on AFs without requiring transitivity. \dv{What to do about this paragraph?}
+
+\section{Well-founded vs. almost-full relations}\label{sect:wf-to-af}
+
+To build up some more intuitions about AF relations, we now turn to the connection between
+AF relations and well-founded relations. A well-founded relation can be constructively 
+characterized as a relation where every element in its domain is {\em accessible}. 
+The corresponding (standard) Coq definitions are: 
+\begin{lstlisting}
+Inductive Acc (A:Type) (R:A->A->Prop) (x:A) : Prop :=
+  Acc_intro : (forall y : A, R y x -> Acc R y) -> Acc R x.
+Definition well_founded :=
+  fun (A:Type) (R:A -> A -> Prop) => forall a:A, Acc R a.
+\end{lstlisting}
+Coq comes with a library for constructing well-founded relations
+as well as proofs that several relations on commonly used datatypes are well-founded, 
+the $<$ relation on \lstinline|nat| being the simplest example. 
+
+It is easy to construct AF relations from {\em decidable} well-founded relations:
+If we are given a decidable WF relation \lstinline|R| then we will
+show next that the relation \lstinline|fun x y => not (R y x)| is AF. This will enable 
+us to re-use Coq libraries and lemmas for WF relations in developments for AF relations.
+We will use an auxiliary lemma \lstinline|af_iter|, which proves by 
+induction on an accesibility predicate for an element \lstinline|x| 
+that a larger relation \lstinline|fun y z => not (R y x) \/ not (R z y)| is 
+AF. 
+\inputcoq{AlmostFull}{Decidable}
+\inputcoq{AlmostFull}{AfTreeIter}
+We accept as input an \lstinline|x| which is accessible and we induct on the accessibility predicate. We 
+create an \lstinline|AF_SUP| object. When we are presented with a ``next'' 
+element \lstinline|y| we check whether \lstinline|R y x| or not using the decidability predicate \lstinline|decR|. If not, then we have immediately found both the elements and we can return \lstinline|ZT|. If on the other hand
+it is \lstinline|R y x| then we use the induction hypothesis.
+\dv{I feel this informal sketch is unhelpful. 
+Either make it more precise or drop.}
+
+With this definition, it is not difficult to derive the following.
+%\inputcoq{AlmostFull}{AfTree}
+%\inputcoq{AlmostFull}{AfFromWf}
+\inputcoq{AlmostFull}{AfFromWfCor}
+Corollary \lstinline|af_from_wf| allows us to go from a 
+decidable well-founded relation to an AF. With this principle, and taking into account 
+that $<$ is decidable and a total order, we can actually prove:
+\inputcoq{AFConstructions}{LeqAF}
+since $\forall x y, x \leq y \leftrightarrow \lnot (y < x)$ on natural numbers.
+
+\subsection{From almost-full to well-founded relations}\label{sect:af-to-wf}
+
+So far AF relations appear to be a funny flipped-over version of Coq's WF relations, so 
+it's time we saw how can they be used to prove termination. The key intuition comes
+from online termination testing with WQOs. Recall that a WQO-based termination
+checker takes a WQO $\preceq$ and a ``history'' of past values and when presented with a new 
+value checks whether some old value from the history is related to this new value. 
+
+Think now of the relation \lstinline|T : X -> X -> Prop| which relates all adjacent 
+values $s_{i+1}$ and $s_{i}$ (and only those) in the input sequence. This is often called the {\em transition relation} 
+of the program that generates this sequence. As a convention we will be using the first argument of \lstinline|T| as
+the ``next'' value and the second as the ``current'' value (so that we have $T\;s_{i+1}\;s_i$ for every $i$). 
+The termination test that our WQO-based checker effectively implements is that:
+\[ T^{+} \cap  (\preceq)^{-1} = \emptyset \]
+where $T^{+}$ is the transitive closure of $T$ and $(\preceq)^{-1}$ is just the inverse of $\preceq$. No infinite 
+sequence can pass this test, because an infinite sequence will necessarily have elements related by $\preceq$! 
+Put it another way, if the test succeeds the transition relation cannot have infinite chains -- well, it 
+is well-founded!
+
+Generalizing our intuition from transition relations to arbitrary relations, and weakening the 
+assumptions from WQOs to AF relations, the following lemma is the most important result of this 
+paper, hence we put it in a big box:
+\begin{center}
+\framebox{
+\inputcoq{AlmostFull}{WfFromAf}
+}
+\end{center}
+In the \lstinline|wf_from_af| lemma, \lstinline|clos_trans_1n X T| is just the 
+transitive closure of \lstinline|T|, as defined in Coq's standard library. 
+
+Using \lstinline|wf_from_af| we can derive a simple lemma for transitive AFs, which
+are WQOs: 
+\inputcoq{AlmostFull}{WfFromWqo}
+For instance, for the $\leq$ relation on natural numbers, it is clearly the case 
+that $\lambda x y. x \leq y \land \lnot(y \leq x)$ is WF. This relation is simply $<$.
+
+Of course the proof of \lstinline|wf_from_af| is done in a constructive setting, no infinite 
+descending chains are involved, and hence the mathematically curious reader may wonder how 
+the proof of this theorem goes. We present the key idea next -- the non-curious reader can 
+skip directly to Section~\ref{ssect:new-induction}.
+
+The proof of lemma \lstinline|wf_from_af| is done through the following generalization:
+\inputcoq{AlmostFull}{AccFromAf}
+To understand the generalization in lemma \lstinline|acc_from_af| it is easier to think again the 
+special case of \lstinline|T| as a ``transition relation'' of a program. With lemma \lstinline|acc_from_af| 
+we focus on a particular element \lstinline|y| and show that it is accessible. Instead of assuming that
+the whole transitive closure of $T$ does not intersect with (the inverse of) \lstinline|R|, we will assume 
+the same property only for the part of the transitive closure that ``follows'' \lstinline|y| in the sequence. 
+Once this generalization is done, the proof is by induction on the \lstinline|almost_full| proof object.
+\dv{I removed the informal text proof but the old proof is commented in text.}
+%% We proceed by induction on \lstinline|p|: 
+%% \begin{itemize*}
+%%  \item 
+%%   If \lstinline|p = ZT| then all elements are related by \lstinline|R|. It suffices to show that all elements
+%%   \lstinline|z| for which \lstinline|T z y| are accessible (by the \lstinline|Acc_intro| constructor). But 
+%%   then \lstinline|clos_refl_trans X T y y| and also \lstinline|clos_trans_1n X T z y| and \lstinline|R y z| 
+%%   which is a contradiction, so this case is done.
+%%  \item
+%%   If \lstinline|p = SUP w| then, again, it suffices to show that all elements \lstinline|z| for which 
+%%   \lstinline|T z y| are accessible (by the \lstinline|Acc_intro| constructor). We know that \lstinline|w y|
+%%   secures the relation \begin{center} 
+%%         \lstinline|Ry := fun y0 z0 => R y0 z0 \/ R y y0|
+%%    \end{center}
+%%   Thus, we may apply the induction 
+%%   hypothesis for \lstinline|z|, instantiating \lstinline|R| to \lstinline|Ry|. To finish the case we need 
+%%   to show that for any \lstinline|x| and \lstinline|w| such that \lstinline|clos_refl_trans X T w z|
+%%   it is impossible to have \lstinline|clos_trans_1n X T x w /\ (R w x \/ R y w)|, given that it is impossible 
+%%   to have \lstinline|clos_trans_1n X T x w /\ R w x| for all elements \lstinline|x| and \lstinline|w| with \lstinline|clos_refl_trans X T w y|. 
+%%   Let us pick any 
+%%   \lstinline|w| ``following'' \lstinline|z|. Since \lstinline|clos_refl_trans X T w z| and \lstinline|T z y| 
+%%   it must be that \lstinline|clos_refl_trans X T w y|. So it cannot be that \lstinline|clos_trans_1n X T x w /\ R w x|. The 
+%%   only case we have to rule out is when \lstinline|clos_trans_1n X T x w| and \lstinline|R y w|: But here 
+%%   we have \lstinline|clos_refl_Trans X T y y| and \lstinline|clos_trans_1n X T w y| and \lstinline|R y w|, 
+%%   which is again a contradiction.
+%% \end{itemize*}
+
+Deriving Lemma \lstinline|wf_from_af| from this generalization is a trivial task, since every element
+is related to itself in the reflexive transitive closure of \lstinline|T|, hence every element is accessible, thus
+\lstinline|T| is well-founded.
+
+\subsection{A new induction principle}\label{ssect:new-induction}
+
+If we can use lemma \lstinline|wf_from_af| to form WF relations, then we can surely use it to 
+perform induction. The theorem \lstinline|af_induction| in Figure~\ref{t:compind} demonstrates 
+a new induction principle, based on \lstinline|wf_from_af|. 
+%\begin{center}
+%\framebox{\inputcoq{AlmostFullInduction}{AfInduction}}
+%\end{center}
+Intuitively \lstinline|T| is the relation between the argument in the ``next'' recursive 
+call (\lstinline|y|), and the previous (\lstinline|x|) and we are simply requiring that 
+the transitive closure of \lstinline|T| has an empty intersection with (the inverse of) 
+some AF relation \lstinline|R|. 
+
+Hence, when using AF induction, the programmer must (i) provide an AF relation, (ii) show 
+the emptyness of the intersection, and (iii) provide a functional for the recursive call. 
+%\vspace{5pt}\begin{example}
+%Let's see this induction principle in action with a very simple example that computes Fibonacci 
+%numbers:\footnote{Of course \lstinline|af_induction| is a pretty contrived way to write this simple function 
+%but we'd like to demonstrate the three steps with the simplest possible example before we dive in more complex examples.}
+%\inputcoq{AlmostFullInduction}{Fibonacci}
+%As a remark, to ensure that computation does not get stuck we have 
+%used \lstinline|Defined| instead of \lstinline|Qed| (and we do so in most of our development), which makes the 
+%various lemmas and definitions transparent for computation purposes.
+%\end{example}
+It is worth contrasting \lstinline|af_induction| with Coq's standard well-founded induction, 
+and Figure~\ref{t:compind} presents our new induction principle side-to-side to Coq's standard WF 
+induction.
+\begin{figure*}[t]
+\begin{tabular}{l}
+\begin{lstlisting}
+af_induction
+     : forall (A : Set) (T R : A -> A -> Prop),
+       almost_full R ->
+       (forall x y : A, clos_trans_1n A T x y /\ R y x -> False) ->
+       forall P : A -> Set,
+       (forall x : A, (forall y : A, T y x -> P y) -> P x) -> forall a : A, P a
+\end{lstlisting}\\ \\
+\begin{lstlisting}
+well_founded_induction
+     : forall (A : Set) (T : A -> A -> Prop),
+       well_founded T ->
+       forall P : A -> Set,
+       (forall x : A, (forall y : A, T y x -> P y) -> P x) -> forall a : A, P a
+\end{lstlisting}
+\end{tabular}
+\caption{AF vs WF induction principles}\label{t:compind}
+\end{figure*}
+Notably, \lstinline|af_induction| takes both \lstinline|T| and an AF relation \lstinline|R|, the empty 
+intersection requirement, and the functional for the recursion, whereas \lstinline|well_founded_induction| 
+only requires a proof that \lstinline|T| is well-founded. 
+
+
+\paragraph{Summary} So far we have generalized and proved the underlying principle behind WQO-based online
+termination testing and revealed the connections between AF relations and WF relations. We have used this 
+underlying principle to derive a simple AF-based induction principle. From a programmer's perspective this
+new principle does not {\em yet} seem to have made things nicer really, as the user now has to prove two 
+preconditions instead of one. So it's time we move on to the benefits of using AF relations that we 
+promised to deliver in the introduction.
+
+\section{Constructions on AF relations}\label{sect:af-constructions} 
+
+The nicest characteristic of AF relations is their {\em remarkable composability}. In 
+%this section we will show various results that substantiate this claim. by presenting a powerful toolkit 
+%for the several constructions on AF 
+%relations.
+%the union of AF relations is AF (Section~\ref{ssect:union}) 
+%and the intersection of AF relations is AF (Section~\ref{ssect:intersection}). 
+%We also show type-based compositions (Section~\ref{ssect:typecomp}): how to use map-like operations, 
+%how to create AF relations for products, tagged unions (sums), and finite types (such as \lstinline|bool|). 
+Together with our results from Section~\ref{sect:wf-to-af}, which can be used to give us ``ground'' AF relations from existing WF relations, this section presents a powerful toolkit for the \lstinline|af_induction| user.
+
+\subsection{AF unions}\label{ssect:union}
+
+If we are presented with an infinite sequence in which there
+exist two related elements by relation \lstinline|A| then obviously these two elements are also related 
+by the relation \lstinline|A|~$\cup$~\lstinline|B|.More generally, it takes a straightforward induction on 
+the AF proof objects to prove the following lemma:
+\inputcoq{AlmostFull}{AFStrengthen}%
+From which the next corollary follows:
+\inputcoq{AFConstructions}{AfUnion}
+
+\subsection{AF intersections}\label{ssect:intersection}
+
+Intersections are much harder. Imagine that we have AF relations \lstinline|A| and 
+\lstinline|B|. If we are presented with an infinite sequence then we definitely know that 
+\lstinline|A| relates some elements in the sequence, and \lstinline|B| relates some elements in 
+the sequence, but are there any elements that are {\em simultaneously} related by \lstinline|A| and 
+\lstinline|B|? Remarkably, the answer is affirmative. A generalization of this theorem to $k$-ary AF relations is often called 
+the ``intuitionistic version of Ramsey's theorem''~\cite{Veldman01041993}.\footnote{Exercise: use Ramsey's theorem 
+to prove (classically) the intersection theorem, proceeding by contradiction and using a 3-coloring.} 
+
+Here we focus on the binary case, following and simplifying the setup 
+in~\cite{Veldman01041993,coquand-short}. We will not present the proof in detail in this section, 
+but rather prove it as an instance of a much more general theorem in Section~\ref{sect:generalized-irt}.
+
+%% The idea of the proof is that, given two well-founded 
+%trees that secure relations \lstinline|A| and \lstinline|B| respectively, we will construct 
+%another one that secures their intersection. This construction involves three stages. 
+%
+%\begin{itemize*} 
+%  \item First, we define the \lstinline|oplus_nullary| function below:
+%\inputcoq{AFConstructions}{OplusNullary}
+%The function \lstinline|oplus_nullary| secures intersections of nullary predicates, which
+%is shown with the following lemma:
+%\inputcoq{AFConstructions}{OplusLemma}
+%
+%  \item Next, we proceed one level-up, to define \lstinline|oplus_unary|:
+%\inputcoq{AFConstructions}{OplusUnary}
+%We've written the function using Coq's tactic language because it involves a
+%nested induction, but it's easier to understand it operationally using the 
+%following Haskell code:
+%\inpuths{AlmostFullHaskell}{OplusUnary}
+%There is a similar lemma about \lstinline|oplus_unary|, that explains how it can be used
+%to secure intersections of unary predicates: 
+%\inputcoq{AFConstructions}{OplusUnaryLemma}
+%
+%  \item Finally, we proceed yet one level up, to define \lstinline|oplus_binary|: 
+%\inputcoq{AFConstructions}{OplusBinary}
+%Its definition follows \lstinline|oplus_unary| and it's perhaps simpler to understand in Haskell: 
+%\inpuths{AlmostFullHaskell}{OplusBinary}
+%\end{itemize*}
+%
+%The fixpoint \lstinline|oplus_binary| turns out to be exactly what we want to combine
+%well-founded trees to secure intersections (of binary predicates). Here is the 
+%corresponding lemma:
+%\inputcoq{AFConstructions}{OplusBinaryLemma}
+%The proofs of all three lemmas above are direct and short, and their corollary is:
+\inputcoq{AFConstructions}{AfIntersection}
+
+The binary version of the Ramsey theorem is, using classical logic, a direct consequence of \lstinline|af_intersection|: 
+consider a binary relation $R$ on \lstinline|nat| and call a subset $A$ of \lstinline|nat| homogeneous iff:
+\begin{itemize*} 
+   \item For all $n$ and $m$ in $A$ such that $n < m$ it is $R\;n\;m$, {\em or} 
+   \item For all $n$ and $m$ in $A$ such that $n < m$ it is $\lnot(R\;n\;m)$.
+\end{itemize*}
+Ramsey's theorem states that for every binary relation $R$ there exists 
+an {\em infinite} homogeneous subset of \lstinline|nat|, $A$. To prove this, assume by 
+contradiction that no such infinite homogeneous subset exists. This means that both $R$ and $\lnot R$ are AF, which 
+means that their intersection is AF by \lstinline|af_intersection|. But the empty relation 
+cannot be AF because it relates no elements whatsoever! 
+
+As a final remark, the intersection theorem for the case of WQOs is folklore. There, 
+the transitivity assumption appears to significantly simplify the 
+proof. For instance, such a proof is contained in a short paper by Nash-Williams~\cite{OnWellQuasiOrderingFiniteTrees}.
+
+\subsection{Type-based combinators}\label{ssect:typecomp}
+
+In this section we show how to derive AF relations from simpler 
+ones in a type-directed way, and how we may use them to define 
+recursive functions. 
+
+\paragraph{Ranking functions}
+We can show a theorem that is useful when we would like to map 
+complicated data structures to \lstinline|nat| values through ``ranking functions''.
+\inputcoq{AFConstructions}{CoFmapLemma}
+For instance we may map our data structures to natural numbers and re-use the 
+$\leq$ relation and the \lstinline|leq_af| witness that $\leq$ is AF.
+
+%We can show that well-founded trees is a cofunctor by defining
+%a cofmap operation 
+%\inputcoq{AFConstructions}{CoFmapLemma}
+%with the straightforward property, and corollary: 
+%\inputcoq{AFConstructions}{CofmapLemma}
+%\inputcoq{AFConstructions}{CoFmapCorollary}
+%For example, the \lstinline|af_cofmap| theorem can be used  when we would like to map 
+%complicated data structures to \lstinline|nat| values through ``ranking functions'', so 
+%that we may then re-use the $\leq$ relation and the \lstinline|leq_af| witness that $\leq$ is AF.
+
+\vspace{5pt}
+\begin{example}[Use of a ranking function]
+Consider the following definition (in Haskell notation\footnote{AFExamples.v 
+gives the Coq definition.}):
+\begin{lstlisting}[language=hs]
+flip1 (0,_) = 1 
+flip1 (_,0) = 1 
+flip1 (x+1,y+1) = flip1 (y+1,x)
+\end{lstlisting}
+Through the use of \lstinline|af_cofmap| we may define this function by observing that
+the transition relation is \lstinline|T x y := fst x <= snd y /\ snd x < fst y|. We may now
+take \lstinline|R x y := fst x + snd x <= fst y + snd y | as our AF relation. Showing that 
+\lstinline|forall x y, clos_trans T x y /\ R y x -> False|
+is easy and the proof that \lstinline|R| is AF is just (\lstinline|af_cofmap leq_af|).
+\end{example}
+
+\paragraph{Finite types}
+
+There is a very natural AF relation on types that have finitely many inhabitants, and that 
+is simply the equality on elements of these types. The simplest interesting such finite type
+is \lstinline|bool|. Why is equality on booleans AF? Because in any infinite sequence we are 
+guaranteed that in the first three elements of the sequence two of them will be equal. Hence
+we can show:
+\inputcoq{AFConstructions}{AfBool}
+and the proof involves three applications of \lstinline|AF_SUP| followed by a \lstinline|AF_ZT|. 
+
+We are not going to generalize here this construction to arbitrary finite types, but the
+reader should be convinced that this is possible to do -- a proof object with $k+1$ uses of 
+\lstinline|AF_SUP| before returning \lstinline|AF_ZT| does the job for any finite type 
+inhabited by $k$ values. Our accompanying development includes this construction. 
+
+\paragraph{Products}
+The intersection property and cofunctoriality are already extremely powerful -- here is 
+the simplest construction to create an AF relation for products based on these components:
+\inputcoq{AFConstructions}{AfProduct}
+The proof is just applications of \lstinline|af_intersection| and \lstinline|af_cofmap| through
+the \lstinline|fst| and \lstinline|snd| projections out of pairs.
+
+Of course, this is not the only AF relation on products -- it's just a particular one. For
+instance one could completely ignore the second component of a pair and only use and AF 
+relation on the first component though the use of \lstinline|af_cofmap|.
+
+%\inputcoq{AFConstructions}{AfProductLeft} 
+%or could imagine other wild combinations through the use of cofunctoriality, unions and 
+%intersections -- or as a last resort, could create something more sophisticated by hand-writing 
+%the AF proof for our relation.
+
+We give now a small example to demonstrate the product combinator in action. 
+\vspace{5pt}\begin{example}[Lexicographic order]
+Consider the following recursive definition (in Haskell notation):
+\begin{lstlisting}[language=hs]
+flex (0,_) = 1
+flex (_,0) = 1 
+flex (x+1,y+1) = f (x,y+2) + f (x+1,y) 
+\end{lstlisting}
+This is an example of function where the arguments descend lexicographically. We can 
+also observe that in any recursive call, one of the two arguments is decreasing. This 
+immediately suggests that we should use the AF 
+relation 
+\begin{center} 
+\lstinline| R x y := fst x <= fst y  /\ snd x <= snd y|
+\end{center}
+Recall that since $\leq$ is AF and we have already given a product combinator (\lstinline|af_product|), 
+the relation \lstinline|R| is AF. The transition relation of the program is also what you'd expect:
+\lstinline|T x y := fst x < fst y \/ (fst x = fst y /\ snd x < snd y)|, since in the first recursive call, 
+the first argument becomes smaller, and in the second recursive call the second argument becomes smaller, while the first remains the same.
+It is then quite easy to show that
+\lstinline|forall x y, clos_trans T x y /\ R y x -> False| and 
+apply \lstinline|af_induction| to define the recursive function.
+\end{example}
+
+\paragraph{Sums} 
+If we are given two AF relations on types \lstinline|X| and \lstinline|Y| respectively, 
+is there a natural AF relation that we can define on \lstinline|X+Y|? One that we find 
+often useful is the relation that lifts these two relations in the following way:
+\inputcoq{AFConstructions}{SumLift}
+If two elements have the same tags they are compared with one or the other relation, 
+otherwise they are not related. We will now show that if \lstinline|A| and \lstinline|B|
+are AF, then so is \lstinline|sum_lift A B|. The key intuition behind our construction is
+the close connection between tagged sums and products where the first component is the 
+``tag'' and the second is the value, and is ommited due to lack of space. Our result is:
+\inputcoq{AFConstructions}{AfSumLift}
+
+%Here is the construction step-by step.
+%\begin{itemize*}
+%  \item First, consider the following definition
+%  \inputcoq{AFConstructions}{LeftSumLift}
+%  which is almost like \lstinline|sum_lift| but in the case of two right injections returns
+%  \lstinline|True|. 
+%  If we are given a proof object that shows the relation \lstinline|A : X -> X -> Prop| is AF, 
+%  we can show that \lstinline|left_sum_lift A| is AF. 
+%  \inputcoq{AFConstructions}{SecLeftSumTree}
+%  What is the intuition behind the proof of \lstinline|af_left_sum|? If the proof object is \lstinline|AF_ZT| then all 
+%  elements \lstinline|X| are related and hence if we take three elements in a row with 
+%  \lstinline|AF_SUP| constructors we are guaranteed to have shown \lstinline|left_sum_lift A| to be AF, 
+%  either  by having met two left injections, or by having met two right injections. This is exactly what
+%  we did in the case of finite types. 
+%  If on the other hand the proof object that shows \lstinline|A| to be AF is \lstinline|AF_SUP f|, then we 
+%  examine the next element \lstinline|x| -- if it is a left injection we may simply recurse.
+%  If \lstinline|x| is a right injection, then we examine the subsequent element \lstinline|y|: 
+%  if \lstinline|y| is a left injection we can again recurse, but if it is also a right injection
+%  then we are simply finished (since all right injections are related by \lstinline|left_sum_lift A|).
+%
+%  \item Our next step is to flip everything around! We will use of a \lstinline|transpose| 
+%  function and get symmetric versions of the previous lemma.
+%  \inputcoq{AFConstructions}{Transpose}
+%  \inputcoq{AFConstructions}{RightTranspose}
+%  \inputcoq{AFConstructions}{SecRightSumTree}
+%  
+%  \item We are almost there! Observe that if we are given relations
+%        \lstinline|A : X -> X -> Prop| and \lstinline|B : Y -> Y -> Prop| then the 
+%        {\em intersection} of the \lstinline|left_sum_lift A| and \lstinline|right_sum_lift B| 
+%        is precisely \lstinline|sum_lift A B|. We've already shown a combinator for intersections
+%        of relations so it's now straightforward to derive our final result
+%        \inputcoq{AFConstructions}{AfSumLift}
+%\end{itemize*}
+
+We do not present here an example of using \lstinline|af_sum_lift|, but we will see an example
+later in Section~\ref{sect:mutual}. \dv{will we or we don't have space?} 
+
+\paragraph{Dependent products and recursive types}
+We do no currently include in our development combinators for dependent products
+nor recursive types, though nothing seems to be prohibitive about either and we 
+intend to extend the set of available type-based combinators in the future. The 
+question of recursive types is of particular interest as it is a well-studied topic
+in the context of WQOs, where the canonical WQO for lists and more general recursive 
+types is based on homeomorphic embeddings~\cite{OnWellQuasiOrderingFiniteTrees,TreeTheorem}. 
+There have been attempts to port some of these theorems for WQOs in a constructive setting 
+(e.g. homeomorphic embeddings for lists on finite alphabets~\cite{berghofer-higman,Seisenberger}) 
+so we believe this is a quite plausible direction for future work. 
+
+\section{Size-change termination and AF induction}\label{sect:af-in-practice}
+
+We have examined combinators on AF relations, and simple examples such as lexicographic
+descent. Lexicographic orders are not terribly difficult (Coq already comes with 
+combinators to compose lexicographically two well-founded relations, in fact) but the power of 
+the method shows itself in examples that go beyond lexicographic orders. Consider 
+the following example.
+
+\vspace{5pt}\begin{example}[Beyond lexicographic order]
+Here is an example in Haskell-like notation:
+\begin{lstlisting}[language=hs]
+gnlex (0,_) = 1 
+gnlex (_,0) = 1
+gnlex (x+1,y+1) = gnlex (y+1,y) + gnlex (y+1,x)
+\end{lstlisting}
+To define this program, we will use the AF \lstinline|R| for products, and the 
+``obvious'' transition relation \lstinline|T|:
+\inputcoq{AFExamples}{GNLexRelations}
+It's now possible to show that the transitive closure of \lstinline|T| has 
+an empty intersection with (the inverse of) \lstinline|R|. Thus, our accompanying development 
+defines \lstinline|gnlex| using \lstinline|af_induction|. 
+\end{example}
+
+%we have proved this 
+%lemma independently and called it \lstinline|T_empty_intersect|. Using this 
+%lemma we may define \lstinline|gnlex| completely as: 
+%\inputcoq{AFExamples}{GNLexSimple}
+%\end{example}
+
+Ben-Amram~\cite{Ben-amram02generalsize-change} notices that examples like \lstinline|gnlex| belong 
+in a syntactic class of programs that can be shown terminating by {\em size-change termination} (SCT) ~\cite{Lee+:sct, jones-bohr,Ben-amram02generalsize-change}  
+but not by a direct lexicographic descent argument, although semantically the class of {\em mathematical 
+functions} one may define using size-change termination and those that can be defined with 
+lexicographic descent orders coincide. It is then reassuring to see that examples from that 
+class can be written quite straightforwardly!
+
+\subsection{Formal connection}
+
+In fact, the connection to size-change termination can be made more precise. The short 
+summary of this section is that the soundness of size-change termination follows from our 
+general \lstinline|wf_from_af| lemma. For the rest of this section we show this connection, 
+using \lstinline|gnlex| as our working example. 
+
+Let us start by briefly describing the main idea behind SCT: The first step 
+in showing that a recursive definition is terminating is to identify the various 
+recursion patterns and abstract each as a {\em size-change graph}. A size-change graph for a $k$-argument function is a 
+labeled graph with nodes labeled from $\{0,\ldots,k-1\}$ and arcs with labels $<$ and $\leq$.
+\vspace{5pt}
+\begin{example}[Size-change graph for gnlex]
+For our two-argument function \lstinline|gnlex| we get the following 
+two size-change graphs (arising from the transition relation \lstinline|T| of the function):
+\newcommand{\tZ}{{\footnotesize{0}}}
+\newcommand{\tO}{{\footnotesize{1}}}
+\tikzstyle{nsct}= [circle, draw, minimum size = 5pt,inner sep=1pt, outer sep=1pt]
+\begin{center}
+\begin{tabular}{ccc}
+\begin{tikzpicture}[auto, sibling distance = 30mm, node distance=1.5cm]
+    \node [nsct] (a) {\tZ};
+    \node [nsct, left of=a] (b) {\tZ};
+    \node [nsct, below of=a] (c) {\tO}; 
+    \node [nsct, below of=b] (d) {\tO};
+    \path [->] (b) edge node[sloped] {$\leq$} (c);
+    \path [->] (d) edge node[sloped] {$<$} (c);
+\end{tikzpicture} & \quad & 
+\begin{tikzpicture}[auto, sibling distance = 30mm, node distance=1.5cm]
+    \node [nsct] (a) {\tZ};
+    \node [nsct, left of=a] (b) {\tZ};
+    \node [nsct, below of=a] (c) {\tO}; 
+    \node [nsct, below of=b] (d) {\tO};
+    \path [->,auto] (b) edge node[sloped] {$\leq$} (c);
+    \path [->,auto] (d) edge node[sloped] {$<$} (a);
+\end{tikzpicture} \\ 
+$G_0$ & \quad & $G_1$ 
+\end{tabular}
+\end{center}
+\end{example}
+A size-change graph $G$ for a $k$-argument function induces a relation on $k$-tuples 
+and we say that a size-change graph {\em approximates} a relation \lstinline|T| 
+iff $T \subseteq T_{G}$. In our \lstinline|gnlex| example, each of the two graphs approximates 
+a disjunct from \lstinline|T|. 
+
+Size change graphs {\em compose} so that the composition of two arcs one of which is $<$ 
+creates a new arc $<$, whereas the composition of two $\leq$ arcs gives a new $\leq$ arc. 
+We write this composition with notation $G_1;G_2$ (written $G_{12}$ for brevity
+below). Graph composition satisfies the following proposition.
+
+\vspace{5pt}\begin{proposition}
+If $G_1$ approximates $T_1$ and $G_2$ approximates $T_2$ then $G_1;G_2$ approximates $T_1{\cdot}T_2$
+(where $\cdot$ is transitive relation composition).
+\end{proposition}
+
+Assume now that the transition relation of a program is given by $n$-disjuncts 
+$T = T_1\cup\ldots T_n$ each of which corresponds to some recursion pattern and is 
+approximated by a size-change graph $G_i$ (as in our example with $n = 2$). Size-change 
+termination then considers the set $S$, defined as the transitive closure
+of the set $\{ G_1,\ldots,G_n \}$ under graph composition.
+\vspace{5pt}
+\begin{example}[Transitive closure of size-change graphs]
+What is this set $S$ in our \lstinline|gnlex| example? If we start off with 
+$G_0$ and $G_1$, we have to consider the compositions $G_0;G_0$, $G_0;G_1$, $G_1;G_0$, 
+and $G_1;G_1$. We observe that 
+$G_{00}$ is a new graph with edges $ 0 \stackrel{<}{\longrightarrow} 1$, $1 \stackrel{<}{\longrightarrow} 1$, 
+$G_{01}$ is a new graph with edges $ 0 \stackrel{<}{\longrightarrow} 0$, $1 \stackrel{<}{\longrightarrow} 0$, 
+$G_{10}$ is {\em exactly} $G_{00}$ and $G_{11}$ is a new graph with 
+edges $ 0 \stackrel{<}{\longrightarrow} 0$, $1 \stackrel{<}{\longrightarrow} 1$. If we continue in this fashion
+we can compute that the set $S$ is just:
+\[ S = \{ G_0, G_1, G_{00}, G_{01}, G_{11}, G_{111} \} \] 
+\end{example}
+
+What is the importance of the set $S$? We have seen that $T$ can be approximated
+by $\{G_0,G_1\}$ and we have seen that compositions of graphs approximate compositions of 
+relations. This means that for every $k$, the composition of $T$ with itself $k$ times
+$T^k$ (which we will call the $k$-th {\em power} of $T$) can be approximated by the set 
+of graphs in $S$ (which will typically, as in our example, be finite): Precisely, for 
+every $x$ and $y$ such that $T^{k}\;x\;y$ it is the case that $T_{G}\;x\;y$ for 
+some $G \in S$. This is wonderful news, because it enables the following lemma. 
+
+\vspace{5pt}\begin{lemma}\label{lem:general-sct}
+Assume that $T = T_1\cup\ldots\cup T_n$ and $G_i$ approximates $T_i$, and let $S$ be the transitive 
+closure of the set $\{G_i,\ldots,G_n\}$. If every $G \in S$ induces a relation $T_G$ such that
+$T_G \cap R^{-1} = \emptyset $ for some AF $R$ then $T$ is well-founded.
+\end{lemma} 
+\begin{proof} 
+By \lstinline|wf_from_af| we only have to show that for all $x$ and $y$ 
+such that $T^{+} x\;y$ it is not the case that $R\;y\;x$. If
+$T^{+}x\;y$ then there exists some $k$ such that $T^{k}x\;y$, which means that 
+there exists some $G \in S$ such that $T_G\;x\;y$ and we know that $T_G \cap R^{-1} = \emptyset$.
+\end{proof}
+
+Next, consider the size-change graph $I$ with 
+edges $i \stackrel{\leq}{\longrightarrow} i$ for each $i$, and let us call the induced relation 
+$T_I\;x\;y = \bigwedge x_i \leq y_i$. By the constructive Ramsey Theorem, \lstinline|af_intersection|, $T_I$ is AF.
+
+\vspace{5pt}\begin{example}
+We can now show that \lstinline|gnlex| is terminating by checking that 
+every graph $G \in S$ has empty intersection with $(T_I)^{-1}$ and using 
+Lemma~\ref{lem:general-sct}.
+\end{example}
+
+Size-change termination uses the same AF relation $T_I$ and Lemma~\ref{lem:general-sct}, 
+through the following auxiliary lemma. 
+
+\vspace{5pt}\begin{lemma}\label{lem:aux-sct}
+If $G$ approximates $T$ and some power $G^n$ of $G$ contains an arc $i \stackrel{<}{\longrightarrow} i$ 
+then $T \cap T_I^{-1} = \emptyset$. 
+\end{lemma}
+\begin{proof} Assume that $T\;x\;y$ and $T_I\;y\;x$. We then have 
+$(T{\cdot}T_I)\;x\;x$ and $(T{\cdot}T_I)^n\;x\;x$. But $I$ approximates $T_I$ and because compositions
+of graphs approximate compositions of relations and $G;I = G$ it follows 
+that $G^n$ approximates $(T{\cdot}T_I)^n$. this means that $x_i < x_i$, which is a 
+contradiction.\footnote{The argument is still constructive as we can represent 
+$T \cap T_I^{-1} = \emptyset$ as $\forall x y, T~x~y \land T_I~y~x \to {\tt False}$.}
+\end{proof}
+We are now ready to state and prove the basic SCT principle. 
+\vspace{5pt}\begin{theorem}[Size-change termination]
+Assume that $T = T_1\cup\ldots\cup T_n$ and $G_i$ approximates $T_i$, and let $S$ be the transitive 
+closure of the set $\{G_i,\ldots,G_n\}$. If every $G \in S$ has a power with an 
+arc $i \stackrel{<}{\longrightarrow} i$ then $T$ is well-founded. 
+\end{theorem}
+\begin{proof}
+By Lemma~\ref{lem:aux-sct} we know that $T_G \cap T_I^{-1} = \emptyset$ for every $G \in S$, and 
+by Lemma~\ref{lem:general-sct} we are done. 
+\end{proof}
+Hence, we have proved the size-change termination condition relying on our 
+\lstinline|wf_from_af| theorem. The reader can observe that the condition is true 
+for the set $S$ we have computed for \lstinline|gnlex|. 
+
+As a side-note, sometimes the size-change termination criterion is stated by requiring that 
+every idempotent graph $G \in S$ has an arc $i \stackrel{<}{\longrightarrow} i$, which is an equivalent 
+condition since any size-change graph has an idempotent power. 
+
+We have not formalized this connection in Coq, but this formalization seems like an interesting
+direction for future work, especially combined with tactics to extract automatically 
+size-change graphs from Coq recursive definitions. For now we will simply state that SCT 
+can be proved using our \lstinline|wf_from_af| and leave the development of an SCT-based 
+tactic as future work. Finally, the literature on SCT is also concerned 
+with {\em mutual induction}. We show how to define mutually inductive fixpoints using AF 
+relations in Section~\ref{sect:mutual}.
+
+%% this amounts to checking that all idempotent compositions of size-change graphs have
+%% an empty intersection with the (inverse of) the AF relation which is comprised of the intersection 
+%% of simpler AF relations for each of the arguments. It seems that this principle is more powerful 
+%% than the \lstinline|af_power_induction|, but at the same time it seems to be better suited for a 
+%% tool and not for humans: To use SCT, one has to identify all possible loops in compositions of 
+%% size-change graphs. That said, we've shown how to use \lstinline|af_power_induction| to show a
+%% canonical example from size-change termination and we leave it as future work to formulate SCT 
+%% termination as an extension of our library. 
+
+\section{The Terminator rule}\label{sect:terminator}
+
+We have used online termination and WQOs as a way to approach AF relations and 
+\lstinline|af_induction|, but it turns out that \lstinline|af_induction| is general 
+enough to capture the proof principle behind Terminator~\cite{terminator,podelski-rybalchenko:transition}.
+The key theorem behind Terminator is the {\em disjunctive well-foundedness} statement below:
+\begin{quote} If $R_1\ldots R_n$ are well-founded for some finite $n$, 
+              and $R^{+} \subseteq R_1 \cup \ldots \cup R_n$ then $R$ is well-founded.
+\end{quote}
+The proof of this theorem relies on a Ramsey argument~\cite{podelski-rybalchenko:transition}, 
+but here we will simply prove it -- intuitionistically -- by using theorem \lstinline|wf_from_af| 
+from Section~\ref{sect:af-to-wf}. Here it is, together with the proof: 
+\inputcoq{Terminator}{DisjunctiveWF}
+For the sake of demonstration, we have stated and proved the theorem 
+when $n = 2$ but a generalization is trivial. The proof is instructive as well: we do it
+by appealing to \lstinline|wf_from_af| (Section~\ref{sect:af-to-wf}), and instantiating: 
+\begin{center}
+\lstinline| R := fun x y => not (R1 y x) /\ not (R2 y x)| 
+\end{center} 
+We next show that \lstinline|R| is AF by using our constructive Ramsey \lstinline|af_intersection| 
+lemma and \lstinline|af_from_wf| (Section~\ref{sect:wf-to-af}). Finally the intersection emptyness 
+condition is trivial to show. 
+
+We can easily then use disjunctive well-foundedness to deduce the standard Terminator proof rule (for 
+the union of two WF relations): 
+\begin{center}
+\framebox{\inputcoq{Terminator}{TerminatorInduction}}
+\end{center}
+
+\section{Generalized Ramsey's theorem}\label{sect:generalized-irt}
+
+We now turn our attention to the intersection theorem for AF relations, given in 
+Section~\ref{ssect:intersection}, which consitututes an intuitionistic version of Ramsey's theorem. We will show here
+a much more general result for relations of ``inductive arities''. We start with defining predicates on lists
+\inputcoq{AlmostFullGeneralized}{LRel}
+We now generalize our \lstinline|almost_full| definition for predicates over lists:
+\inputcoq{AlmostFullGeneralized}{AFLRel}
+Again there exist two constructors -- the \lstinline|AF_ZT| constructor asserts that the predicate is true for every 
+list, whereas the \lstinline|AF_SUP| constructor asserts that when presented with one new element \lstinline|x|, the
+predicate \lstinline|fun ys => R ys \/ R (x :: ys)| is AF.
+We will be interested in predicates over lists which have an ``inductive arity'': informally, for every sequence of input we
+may append new values only a finite number of times before the value of the predicate becomes constant. We formalize
+this with the definitions below:
+\inputcoq{AlmostFullGeneralized}{Arity}
+The inductive datatype \lstinline|WFT| encodes well-founded trees over a set \lstinline|X|. The \lstinline|Arity| fixpoint
+defines when a relation \lstinline|A| has an ``inductive'' arity.  If we are given a \lstinline|ZT| well-founded tree then the 
+truth value of the predicate \lstinline|A| is 
+constant. However if we are given a \lstinline|SUP w| tree then for every element \lstinline|x|, the relation 
+\lstinline|fun ys => A (x::ys)| has an inductive arity. One can see that since \lstinline|WFT| is inductive this fixpoint ensures
+that after a finite number of inputs (which nevertheless depends on the individual input sequence each time) the value of
+the predicate will become constant. 
+
+Our main result is the following:
+\inputcoq{AlmostFullGeneralized}{AFIntersectLRelCor}
+It's proof is done by generalizing the statement to:
+\inputcoq{AlmostFullGeneralized}{AFIntersectLRel} 
+and proceeding by induction on the arity witness \lstinline|p|, and then the AF proof for \lstinline|A|, and then the 
+AF proof for \lstinline|B|. 
+
+How can we move from and to these generalized list predicates with inductive arities? For instance, for binary relations
+we may define: 
+\inputcoq{AlmostFullGeneralized}{BinRelExtension}
+In this example we extend a binary relation to an \lstinline|LRel| by asserting that the value of the predicate on any list
+with length greater than 2 is the value of the relation on the first 2 arguments. The value of the predicate on fewer arguments
+is just \lstinline|False|. With this definition in place we have proved the following results:
+\inputcoq{AlmostFullGeneralized}{Af2AfLrel}
+\inputcoq{AlmostFullGeneralized}{AfLrel2Af}
+from which the usual \lstinline|af_intersection| theorem from Section~\ref{ssect:intersection} follows.
+
+\section{Mutual induction variations}\label{sect:mutual}
+
+%Our accompanying development includes other variations of induction principles which often rely
+%on finite types or our combinators for sums.  
+
+%Recall that, given a transition relation \lstinline|T| and an AF relation \lstinline|R|, 
+%our proof obligation for \lstinline|af_induction| is:
+%\begin{center}
+%  \lstinline|forall x y, clos_trans_1n X T x y /\ R y x -> False|
+%\end{center}
+%Often, it might be tedious to find the right generalization of this 
+%statement to prove it inductively on the transitive closure. For this reason 
+%we include a powerful generalization of our induction principle, which we 
+%call {\em power-induction}: 
+%\begin{center}
+%\framebox{\inputcoq{AlmostFullInduction}{AfPowerInduction}}
+%\end{center}
+%We use notation \lstinline|power k T| for the $k$-th transitive composition 
+%of \lstinline|T| with itself (written earlier as $T^k$). For instance, 
+%\begin{center}
+%\begin{tabular}{ll}
+%    \lstinline|power 1 T = fun x y => T x y| \\ 
+%    \lstinline|power 2 T = fun x y => exists z, T x z /\ T z y| 
+%\end{tabular} 
+%\end{center}
+%and so on. 
+%The power of \lstinline|af_power_induction| is that it allows for transition relations
+%that don't immediately exhibit some argument metric going down, but they do so after 
+%some ($k$) recursive calls. This is akin to {\em inlining} a recursive definition.
+%
+%Here is another example that can be programmed nicely using power-induction and the 
+%sum combinators we've presented earlier. 
+
+%\vspace{5pt}\begin{example}[Induction and sum combinators]
+%Our development includes the following example (presented here in Haskell-like notation): 
+%\begin{lstlisting}[language=hs]
+%fsum (inl 0)         = 1 
+%fsum (inl (S x))     = fsum (inr (x+2)) 
+%fsum (inr x) | x < 2 = 0 
+%fsum (inr x)         = fsum (inl (x-2))
+%\end{lstlisting}
+%%The interesting observation in this example is that, starting from a left injection, 
+%%after two recursive calls we are back at a left injection and the value has 
+%%decreased. Similarly for a right injection. Let us use this intuition and define
+%%the AF relation \lstinline|Rfsum|, which uses our sum combinator \lstinline|sum_lift|, 
+%%along with the (obvious) transition relation \lstinline|Tfsum| below: 
+%%\inputcoq{AFExamples}{FSumRelations}
+%%Notice that \lstinline|(power 2 T)| satisties a nicer invariant (under transitive composition) 
+%%than \lstinline|T| and we may use AF induction for the \lstinline|(power 2 T)| relation: 
+%%\inputcoq{AFExamples}{FSum}
+%%Notice that we use $k=2$ and we rely on an independently proven 
+%%lemma about the intersection emptyness, \lstinline|fsum_pow2_empty|.
+%%Actually, we can repeat the same definition by using ordinary AF 
+%%induction ($k = 1$) but doing so requires us to prove a more complicated 
+%%invariant about \lstinline|Tfsum|. Happily, choosing $k = 2$ makes the 
+%%proof of the intersection emptyness much simpler.
+%\end{example}
+
+We can easily derive mutual induction principles using AF induction, and we outline here 
+the basic idea for two mutually recursive functions -- the accompanying development gives 
+the full details. 
+
+Suppose that we want to define two mutually recursive functions \lstinline|f : A -> C| 
+and \lstinline|g : B -> D|. Suppose that the transition relation for calls from \lstinline|f| 
+to itself is \lstinline|TAA:A->A->Prop| and for calls from \lstinline|f| to \lstinline|g| is 
+\lstinline|TBA:B->A->Prop|. Similarly calls from \lstinline|g| to itself are described
+by \lstinline|TBB:B->B->Prop| and calls from \lstinline|g| to \lstinline|f| are 
+described by \lstinline|TAB:A->B->Prop|. We may consider the sum \lstinline|A + B|
+and ``lift'' the relations \lstinline|TAA|, \lstinline|TBA|, \lstinline|TAB|, \lstinline|TBB| with 
+\lstinline|lift_rel_union TAA TBB TAB TBA| which operates on \lstinline|A + B| in the following way: if 
+both arguments  are left injections use \lstinline|TAA|, if they are both right 
+injections use \lstinline|TBB|; otherwise use \lstinline|TAB| and \lstinline|TBA| for each case.
+
+If we are given two almost-full relations \lstinline|RA:A->A->Prop| and \lstinline|RB:B->B->Prop| then 
+we can show that the mutually recursive definition is well-formed when
+\begin{lstlisting}
+forall x y, clos_trans_1n (A+B) 
+               (lift_rel_union TAA TBB TAB TBA) x y /\ 
+               sum_lift RA RB y x -> False
+\end{lstlisting}
+Recall that \lstinline|sum_lift| returns \lstinline|False| if the tags do not match, otherwise compares 
+the arguments using \lstinline|RA| or \lstinline|RB|. Intuitively, we tag each argument with the ``name'' 
+of the function it is passed to, and we require that, whenever we return to an argument with the same 
+tag (transitively) the intersection with an AF relation be empty. 
+
+Our development derives such a mutual induction principle (but slightly more general), called 
+\lstinline|af_mut_induction| and shows how one can use it to define fixpoints like:
+\begin{lstlisting}[language=hs]
+f 0     = 1 
+f (x+1) = f x + g (x+2)
+g x | x < 2 = 1
+g (x+2)     = f x 
+\end{lstlisting}
+The interesting bit in this example is that the argument $x+1$ in the first recursive
+call to $g$ does not decrease -- in fact it increases and only when we return to a call
+to $f$ through $g$ does it decrease. 
+
+The design of convenient and general mutual induction principles is a topic that is subject 
+to many engineering decisions and seems an excellent direction for future work. For instance, 
+we could define very easily a $k$-ary mutual induction principle on $k$ functions that all 
+accept arguments of type \lstinline|A| by using a similar methodology: lift the transition relations 
+to type \lstinline|(A * Finite k)| using the finite types to tag arguments with function identifiers, and 
+lift an AF relation on \lstinline|A| to \lstinline|(A * Finite k)| using the \lstinline|af_intersection| 
+theorem and the fact that equality on finite types is an AF relation. 
+
+%\paragraph{The computational content of the proofs}
+%
+%Our development is constructive, so one might wonder about the 
+%computational content of our proofs. Recall corollary \lstinline|af_inf_chain| from 
+%Section~\ref{ssect:af}:
+%\inputcoq{AlmostFull}{InfiniteChainCorollary}
+%In fact we can write a function that, given a \lstinline|WFT X| tree \lstinline|p|, 
+%and an infinite sequence \lstinline|f : nat -> X| computes the length of a prefix of
+%the sequence in which there exist two related elements: 
+%\begin{lstlisting}
+%Fixpoint aux_length X (p:WFT X) (f:nat->X) (k:nat) := 
+%  match p with 
+%  | ZT => k 
+%  | SUP g => aux_length (g (f k) f (S k)).
+%  end.
+%Definition length X (p : WFT X) f := aux_length p f O 
+%\end{lstlisting}
+%In \lstinline|aux_length|, the variable \lstinline|k| is the cursor into 
+%the sequence \lstinline|f|, as in the proof of \lstinline|sec_binary_infinite_chain| 
+%in Section~\ref{ssect:af}.
+%
+%One expects the \lstinline|length| function to terminate immediately when \lstinline|f| 
+%is the trivial sequence $0,0,\ldots$ (\lstinline|fun (x:nat) => O|) and \lstinline|p| is 
+%the well-founded tree that secures $\leq$ (let us call this \lstinline|leq_wft|). Indeed that 
+%is the case, since our construction of the well-founded tree for $\leq$ is based on comparing 
+%two consecutive elements for $<$.
+%
+%Surprisingly, if \lstinline|p = oplus_binary leq_wft leq_wft| (which secures the same 
+%relation, $\leq$) then the call to \lstinline|length p (fun x => O)| does not terminate almost
+%immediately, does not slow down as computation continues, and does not consume increasingly 
+%more memory (in Coq or Haskell, where we've also implemented this for comparison): it seems
+%to loop! 
+%
+%Of course it doesn't {\em actually} loop -- the reason for this behavior is the exponential nature 
+%of the combinators to form trees for intersections of relations. Notice that 
+%\lstinline|length p (fun x => O)| gives the length of the left-most path in the 
+%well-founded tree \lstinline|p| and we can compute the size of this left-most path following the structure 
+%of \lstinline|oplus_nullary|, \lstinline|oplus_unary|, and \lstinline|oplus_binary|:
+%{\small 
+%\begin{lstlisting}[language=hs]
+% lm_nullary x y = x + y 
+% 
+% lm_unary 0 y = y 
+% lm_unary x 0 = x 
+% lm_unary (x+1) (y+1) = 1+lm_nullary (lm_unary x (y+1)) 
+%                                     (lm_unary (x+1) y) 
+% lm_binary 0 y = y 
+% lm_binary y 0 = y 
+% lm_binary (x+1) (y+1) = 1+lm_unary (lm_binary x (y+1)) 
+%                                    (lm_binary (x+1) y)
+%\end{lstlisting}
+%}
+%
+%The leftmost path of \lstinline|leq_wft| is just 2 and hence we are interested
+%in \lstinline|lm_binary 2 2|, which gives us the enormous bound 1254125905363099368618480!
+%
+%This discussion suggests that our combinators for composing AF relations cannot be directly used 
+%to replace or improve history-based online termination testing. For instance, the resulting 
+%termination test for the sequence $(0,0),\ldots$ (which is based on intersection of relations $\leq$ for 
+%the first and second components of a pair) would consume very little memory but would reject the 
+%sequence after 1254125905363099368618480 elements in the sequence!
+%
+%It seems an interesting direction to explore whether there exists a more ``efficient'' version 
+%of these combinators. On the other hand, for type theory (or Coq) these enormous bounds do not 
+%appear to cause any problems at all. 
+
+%\paragraph{Prop versus Set witnesses}
+%
+%The previous discussion about the computational content of our proofs raises another question. 
+%Why did we separate well-founded trees from the \lstinline|SecureBy| predicate, and didn't we 
+%simply define a single inductive predicate for both: 
+%\begin{lstlisting}
+%Inductive AF X : (X -> X -> Prop) : Prop := 
+% | AF_ZT :forall R, (forall x y, R x y) -> AF R 
+% | AF_SUP : 
+%     forall R, (forall x, AF (fun y z => R y z \/ R x y)) -> AF R.
+%\end{lstlisting}
+%There is no significant obstacle associated with this definition but 
+%we have not carried out the experiment -- following a similar stratification in previous work.
+%Actually, it may be advantageous for code extraction to have arguments that only live in \lstinline|Prop|. 
+%On the other hand, having to deal with concrete \lstinline|Set|-based witnesses (\lstinline|WFT X|) felt
+%reassuring and made porting some of this development to Haskell quite straightforward when 
+%investigating the computational content of the AF combinators. 
+
+%% \paragraph{Optimizations using transitivity}
+%% It is actually not necessary to check the whole transitive closure of a relation
+%% to check if the intersection of this and the almost-full relation are empty. It 
+%% suffices, for a transitive almost-full relation (a well-quasi-order), to check a 
+%% subset of it, see {\tt FilteredTransitiveClosure.v} for the details.
+
+
+\section{Related work}\label{sect:related}
+
+\dv{Must revise and add pointers from Carsten Fuhs. I've already added the citations on the local.bib file so we 
+just need to read and say a few words about these works.}
+
+We have already seen the proof principle 
+behind Terminator~\cite{terminator,podelski-rybalchenko:transition} in 
+Section~\ref{sect:terminator}. But why has that proof principle been so successful? One 
+answer is {\em composability}: The way the tool works in practice is by rewriting the 
+program to capture the transitive closure of the transition relation $R$ using some new 
+program variables
+and then try to synthesize well-founded relations $R_1\ldots R_n$ so that $R^{+} \subseteq R_1\cup\ldots\cup R_n$ from
+static analysis of the code. The way this synthesis works is by starting off with the empty 
+union, for which $R^{+} \not\subseteq \emptyset$, a fact that can be used to derive a well-founded
+relation $R_1$. Next, a similar check is made that $R^{+} \subseteq R_1$. If this test fails,
+Terminator uses the failed proof to discover yet another well-founded relation $R_2$ and 
+this time check $R^{+} \subseteq R_1\cup R_2$. The process continues until a termination argument is
+found. The key to the success of this method has been that the termination test simply 
+uses unions of well-founded relations (instead of trying to discover more complex ways to 
+compose them) and throws the ``hard'' part of the proof of checking that ($R^{+} \subseteq R_1\cup\ldots\cup R_n$) 
+to extremely powerful external tools such as SMT solvers. Interestingly, Terminator
+performs something like AF-power-induction if the termination arguments fail
+for the transition relation: it starts unrolling loops until termination argument synthesis
+is able to find an answer. 
+
+Porting some of Ramsey theory in a constructive setting seems to have been a fascinating 
+subject among mathematicians and computer scientists, since the original proof and 
+definitions seem hopelessly classical. Our development is based on Veldman's original 
+ideas~\cite{Veldman01041993,coquand-short}. This is not to say that our development 
+is the only possible way to develop constructive 
+Ramsey-like arguments, for instance there exists an alternative formulation~\cite{Coquand:1994:ART:185268.185270} but does 
+not seem as suitable for termination purposes as the one we present in this paper. Similarly, constructive proofs of 
+various homeomorphic embedding lemmas (such as Higman's Lemma~\cite{berghofer-higman,Seisenberger,Fridlender97higmanslemma})
+have appeared in the literature. Our development seems to be the first that connects 
+constructive Ramsey theory and termination proving. 
+
+Nowadays there exists a large set of recursion-encoding techniques in 
+type theory and Coq, some of which include good support for automation.
+The most straightforward way to program recursion in Coq~\cite{coqart} is either by 
+structural recursion or by using subset types~\cite{Sozeau06subsetcoercions} 
+and \lstinline|measure| arguments. An extension of ``guarded'' recursion (and co-recursion)
+implemented in a variant of Agda is sized-types~\cite{abel:tlca03} (not to be confused with 
+size-change termination).
+
+The Bove and Capretta method~\cite{bove-capretta} is traditionally the {\em de-facto} way to define 
+recursive programs that include complex argument relations in Type Theory: For each recursive
+definition the user introduces an indexed type family with each constructor corresponding
+to a particular recursion pattern and indices that correspond to the program variables. The 
+function can then be defined by induction on this witness and dependent pattern matching. 
+After-the-fact, the programmer can provide such an inductive witness at the call-sites, to 
+justify the totality of their definitions. 
+Krauss~\cite{krauss-function} proposes a related technique for showing automatically 
+the termination of Isabelle functions by extracting their {\em inductive graph} 
+and using an induction principle on that graph (that graph roughly corresponds
+to the Bove-Capretta inductive witness).
+
+Chargu\'eraud~\cite{chargueraud-10-fix} presented recently a fixpoint combinator which 
+uses, internally, extra measure arguments but hides them from the programmer. 
+Chargu\'eraud, in an impressive development, uses previous work on recursion theory 
+(the work on ``optimal fixpoints'') to fully separate the definition of a recursive 
+function from the termination argument. The result is a beautifully engineered library
+that has been used to show many difficult examples from previous work. In spirit, Chargu\'eraud's 
+technique is closer to well-founded relations and measures than AF relations, and it'd be 
+interesting to explore whether some of his ideas for the separation of 
+code and termination arguments can be reused in our development. 
+
+Focusing on practicality, Megacz~\cite{Megacz:coinductive-monad} presents an extremely 
+pleasant to the user monadic way to structure recursive definitions based on a coinductive 
+datatype, which allows one to prove that the recursive definition will terminate 
+after-the-fact. To our surprise, Megacz' method is rarely cited in related work.
+
+\section{Directions for future work}\label{sect:future} 
+
+We have already discussed several possibilities for future work. 
+Some important directions are the design of more induction principles, such as more general and convenient 
+versions of AF mutual induction principles, and ways to bring our development closer to size-change 
+termination. 
+
+Although we have identified an appealing and relatively unexplored induction principle, 
+further investigation is required to make our approach more practical.
+Related work has identified several requirements that have to be met before a 
+termination library or methodology can be deemed effective or successful. It has to:
+(i) allow one to define complex recursion patterns naturally 
+(preferrably by giving code but deferring proof obligations), (ii)~allow computation 
+with recursive definitions, (iii) provide unfolding theorems that unfold a recursive function 
+at will, and (iv)~provide the ability to reason about recursive functions using induction. 
+In the context of a programming language that requires totality checking, the first 
+two requirements matter the most but for a proof assistant the latter two are 
+equally important and we plan to investigate these reasoning principles in future work. 
+
+Another ambitious direction is tool support and automation, as well as the integration 
+of our framework in a practical dependently typed language or proof assistant. 
+The biggest challenge there is to develop a methodology so that a tool (be it an interactive environment, 
+or an type checker) may give feedback to the programmer to help him synthesize the right termination 
+argument, or automatically discharge the various relation inclusion obligations. We are optimistic about this 
+direction, because of (i) the tremendous recent progress in SMT solvers and automated reachability checking 
+and (ii) the composability of AF relations. Research 
+languages such as Trellys\footnote{\url{http://code.google.com/p/trellys/}} and Agda~\cite{norell:thesis}
+could potentially provide good candidates for this kind of tool integration.
+
+%% \paragraph{Acknowledgements} This work started from 
+%% discussions with Byron Cook and Ranjit Jhala, as well as Simon Peyton Jones, 
+%% Max Bolingbroke, and John Hughes. Thanks to Georges Gonthier for several Coq 
+%% tips and tricks.
+
+\bibliography{local}
+
+
+\end{document} 
+
+

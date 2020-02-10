@@ -1,0 +1,84 @@
+\usepackage{listings}
+\lstdefinelanguage{coq}{
+xleftmargin=0.5em,
+basicstyle=\small\ttfamily,
+morekeywords={Record,Axiom,Implicit,Arguments,Notation,Definition,end,Fixpoint,CoFixpoint,forall,fun,Inductive,CoInductive,Lemma,match,Program,
+Require,Import,Set,Structure,Canonical,
+Prop,Type,with,Theorem,Proof,Qed,Defined,Corollary,Ltac},
+%otherkeywords={->},
+morecomment=[l]{//},morecomment=[s]{(*}{*)},morestring=[b]",
+keywordstyle=\color{blue},
+commentstyle=\color{Green4},
+stringstyle=\color{red},
+showstringspaces=false,
+rangeprefix=\(\*\=,
+rangesuffix=\ \*\),
+includerangemarker=false,
+literate= {forall}{{${\forall}\;$}}1  {exists}{{${\exists}\;$}}1 {=>}{{${\Rightarrow}\;$}}1 {->}{{$\to\;$}}1 {<->}{{$\leftrightarrow\;$}}1 
+{/\\}{{$\land\;$}}2
+{\\/}{{$\lor\;$}}2
+}
+\lstloadlanguages{Haskell}
+\lstnewenvironment{code}
+    {\lstset{}%
+      \csname lst@SetFirstLabel\endcsname}
+    {\csname lst@SaveFirstLabel\endcsname}
+    \lstset{
+      basicstyle=\small\ttfamily,
+      flexiblecolumns=false,
+      basewidth={0.5em,0.45em},
+morecomment=[n]{\{-}{-\}},
+      literate={\\\\}{{\char`\\\char`\\}}1
+               {->}{{$\to$}}2 {>=}{{$\geq$}}2 {<-}{{$\gets$}}2
+               {<=}{{$\leq$}}2 {=>}{{$\Rightarrow$}}2 
+               {\ .}{{$\circ$}}2 {\ .\ }{{$\circ$}}2
+               {>>}{{>>}}2 {>>=}{{>>=}}2
+               {|}{{$\mid$}}1               
+% {+}{{$+$}}1 {/}{{$/$}}1 {*}{{$*$}}1 {=}{{$=$}}1
+%               {>}{{$>$}}1 {<}{{$<$}}1 {\\}{{$\lambda$}}1              
+    }
+
+\lstdefinelanguage{hs}{
+xleftmargin=0.5em,
+columns=fixed,
+basicstyle=\ttfamily\footnotesize,
+morekeywords=[1]{data,type,where,let,in,module,case,of,deriving,if,then,else},
+keywordstyle=[1]\color{Magenta4},
+morecomment=[l]{--},
+morecomment=[n]{\{-}{-\}},
+alsoletter={|-,|,=,+,::,\$,==,+>,`div`,`seqI`},
+morekeywords=[2]{|-,|,=,+,::,\$,==,+>,`div`,`seqI`},
+keywordstyle=[2]\color{Yellow4},
+morestring=[b]",
+commentstyle=\color{Red4},
+stringstyle=\color{Brown2},
+showstringspaces=false,
+rangeprefix=\-\-\ /,
+rangesuffix=/,
+includerangemarker=false,
+literate={forall}{{${\forall}\;$}}1
+         {exists}{{${\exists}\;$}}1
+         {|-}{{${\vdash}\;$}}1
+         {||-}{{${\vdash}\;$}}1
+         {\\\\}{{\char`\\\char`\\}}1
+         {\\}{{$\color{Yellow4}\lambda$}}1              
+         {->}{{$\color{Yellow4}\to$}}2 {>=}{{$\color{Yellow4}\geqslant$}}2 {<-}{{$\color{Yellow4}\gets$}}2
+         {<=}{{$\color{Yellow4}\leqslant$}}2 {=>}{{$\color{Yellow4}\Rightarrow$}}2 
+         {\ .}{{$\color{Yellow4}\circ$}}2 {\ .\ }{{$\color{Yellow4}\circ$}}2
+         {>>}{{>>}}2 {>>=}{{>>=}}2
+%         {|}{{$\color{Yellow4}\mid$}}1               
+%
+%literate= {forall}{{${\forall}\;$}}1 {exists}{{${\exists}\;$}}1 {=>}{{${\color{Yellow4}\Rightarrow}\;$}}1 {->}{{$\color{Yellow4}\to\;$}}1 {<->}{{$\leftrightarrow\;$}}1 
+}
+
+\lstset{language=coq}
+\lstset{columns=flexible}
+\lstset{moredelim=[il][\color{red}]{`}}
+%\lstset{moredelim=[il][\color{Cyan4}]{@}}
+\lstnewenvironment{coq}{\lstset{columns=flexible}}{}
+
+\newcommand{\inputcoq}[2]{\lstinputlisting[language=coq,linerange={#2}-End]{#1.v}}
+\newcommand{\inpuths}[2]{\lstinputlisting[language=hs,linerange={#2}-End]{#1.hs}\vspace{-4pt}}
+\newcommand{\inputhsmath}[2]{\lstinputlisting[mathescape,language=hs,linerange={#2}-End]{#1.hs}\vspace{-4pt}}
+\newcommand{\inputhaskell}[2]{\lstinputlisting[language=Haskell,linerange={#2}-End]{#1.hs}}
+
