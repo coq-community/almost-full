@@ -20,7 +20,7 @@ Theorem, useful for proving termination.
 - License: [Unknown](LICENSE)
 - Compatible Coq versions: 8.9 or later
 - Additional dependencies: none
-- Coq namespace: `Almostfull`
+- Coq namespace: `AlmostFull`
 - Related publication(s):
   - [Stop When You Are Almost-Full](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.225.3021&amp;rep=rep1&amp;type=pdf) doi:[10.1007/978-3-642-32347-8_17](https://doi.org/10.1007/978-3-642-32347-8_17)
 

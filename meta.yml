@@ -47,7 +47,7 @@ tested_coq_nix_versions:
 tested_coq_opam_versions:
 - version: dev
 
-namespace: Almostfull
+namespace: AlmostFull
 
 keywords:
 - name: Ramsey theorem
