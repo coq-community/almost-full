@@ -1,0 +1,77 @@
+---
+fullname: Almost Full
+shortname: almost-full
+organization: palmskog
+community: false
+travis: true
+coqdoc: false
+
+synopsis: >-
+  Almost-full relations in Coq for proving termination
+
+description: |-
+  Coq development of almost-full relations, including the Ramsey
+  Theorem, useful for proving termination.
+
+publications:
+- pub_url: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.225.3021&rep=rep1&type=pdf
+  pub_title: Stop When You Are Almost-Full
+  pub_doi: 10.1007/978-3-642-32347-8_17
+
+authors:
+- name: Dimitrios Vytiniotis
+  initial: true
+- name: Thierry Coquand
+  initial: true
+- name: David Wahlstedt
+  initial: true
+
+opam-file-maintainer: palmskog@gmail.com
+
+opam-file-version: dev
+
+license:
+  fullname: Unknown
+  identifier: unknown
+
+supported_coq_versions:
+  text: 8.9 or later
+  opam: '{(>= "8.9" & < "8.12~") | (= "dev")}'
+
+tested_coq_nix_versions:
+- version_or_url: https://github.com/coq/coq-on-cachix/tarball/master
+- version_or_url: '8.11'
+- version_or_url: '8.10'
+- version_or_url: '8.9'
+
+tested_coq_opam_versions:
+- version: dev
+
+namespace: Almostfull
+
+keywords:
+- name: Ramsey theorem
+- name: termination
+
+categories:
+- name: Computer Science/Data Types and Data Structures
+
+build: |-
+ ## Building instructions
+
+ ``` shell
+ git clone https://github.com/palmskog/almost-full
+ cd almost-full
+ make   # or make -j <number-of-cores-on-your-machine>
+ ```
+
+documentation: |-
+  ## Documentation
+
+  Included files:
+  - `AlmostFull.v`: Basic setup, connections to well-founded relations
+  - `AFConstructions.v`: Almost-full relation constructions and type-based combinators
+  - `AlmostFullInduction.v`: Various induction principles 
+  - `AFExamples.v`: Examples
+  - `Terminator.v`: Deriving the Terminator proof rule
+---

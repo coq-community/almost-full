@@ -1,0 +1,31 @@
+opam-version: "2.0"
+maintainer: "palmskog@gmail.com"
+version: "dev"
+
+homepage: "https://github.com/palmskog/almost-full"
+dev-repo: "git+https://github.com/palmskog/almost-full.git"
+bug-reports: "https://github.com/palmskog/almost-full/issues"
+license: "unknown"
+
+synopsis: "Almost-full relations in Coq for proving termination"
+description: """
+Coq development of almost-full relations, including the Ramsey
+Theorem, useful for proving termination."""
+
+build: [make "-j%{jobs}%"]
+install: [make "install"]
+depends: [
+  "coq" {(>= "8.9" & < "8.12~") | (= "dev")}
+]
+
+tags: [
+  "category:Computer Science/Data Types and Data Structures"
+  "keyword:Ramsey theorem"
+  "keyword:termination"
+  "logpath:Almostfull"
+]
+authors: [
+  "Dimitrios Vytiniotis"
+  "Thierry Coquand"
+  "David Wahlstedt"
+]
