@@ -18,7 +18,7 @@ Theorem, useful for proving termination.
   - Thierry Coquand (initial)
   - David Wahlstedt (initial)
 - License: [Unknown](LICENSE)
-- Compatible Coq versions: 8.9 or later
+- Compatible Coq versions: 8.11 or later
 - Additional dependencies: none
 - Coq namespace: `AlmostFull`
 - Related publication(s):

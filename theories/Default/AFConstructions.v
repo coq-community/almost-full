@@ -1,6 +1,6 @@
 Require Import Wf_nat.
 Require Import Arith.
-Require Import Omega.
+Require Import Lia.
 Require Import Wellfounded.
 Require Import List.
 Require Import Relations.
@@ -590,5 +590,5 @@ apply af_intersection. apply af_cofmap. apply leq_af.
 unfold almost_full in *. destruct H. exists x.
 eapply sec_strengthen. Focus 2. apply H. Focus 1.
 intros; simpl. destruct x0. destruct y. simpl in H0.
-unfold eq_fin. firstorder.
+unfold eq_fin. lia.
 Defined.

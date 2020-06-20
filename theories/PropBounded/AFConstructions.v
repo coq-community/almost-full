@@ -1,6 +1,6 @@
 Require Import Wf_nat.
 Require Import Arith.
-Require Import Omega.
+Require Import Lia.
 Require Import Wellfounded.
 Require Import List.
 Require Import Relations.
@@ -367,9 +367,9 @@ Lemma leq_af : almost_full le.
 (*=End *)
 assert (almost_full (fun x y => not (y < x))).
 apply af_from_wf. apply lt_wf. unfold dec_rel.
-intros. destruct (le_lt_dec x y). firstorder. firstorder.
-apply (af_strengthen H). intros. firstorder.
-Defined. 
+intros. destruct (le_lt_dec x y). left; lia. right; assumption.
+apply (af_strengthen H). intros. lia.
+Defined.
 
 Lemma af_finite (k:nat) : almost_full (@eq_fin k).
 set (f1 (x:Finite k) := match x with 
@@ -381,7 +381,7 @@ set (f2 (x:Finite k) := match x with
 assert (almost_full (fun x y => f1 x <= f1 y /\ f2 x <= f2 y)).
 apply af_intersection. apply af_cofmap. apply leq_af.
                        apply af_cofmap. apply leq_af.
-apply (af_strengthen H). intros. destruct H0. firstorder.
-destruct x. destruct y. firstorder. unfold eq_fin. firstorder.
-simpl in *. firstorder.
+apply (af_strengthen H). intros. destruct H0.
+destruct x. destruct y. unfold eq_fin.
+simpl in *. lia.
 Defined.

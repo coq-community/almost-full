@@ -1,6 +1,6 @@
 Require Import Wf_nat.
 Require Import Arith.
-Require Import Omega.
+Require Import Lia.
 Require Import Wellfounded.
 Require Import List.
 Require Import Relations.
@@ -30,9 +30,9 @@ eapply af_induction with (T := T) (R := R).
 (* prove almost_full *)
 apply af_product; repeat (apply leq_af).
 (* prove intersection emptyness *)
-intros x y (CT,H). induction CT. firstorder.
-assert (fst y <= fst z). clear H IHCT. induction CT; repeat firstorder.
-firstorder.
+intros x y (CT,H). induction CT. firstorder; lia.
+assert (fst y <= fst z). clear H IHCT. induction CT; firstorder; lia.
+firstorder; lia.
 (* give the functional *) 
 refine (fun x => match x as w return (forall y, T y w -> nat) -> nat with 
                    | (O,_) => fun frec => 1
@@ -57,7 +57,8 @@ apply af_product; repeat (apply leq_af).
 (* prove intersection emptyness *)
 intros x y (CT,H).
 assert (T x y). clear H. 
-induction CT; firstorder. firstorder.
+induction CT; unfold T in *; lia.
+unfold T in *; unfold R in *; lia.
 (* give the functional *) 
 refine (fun x => match x as w return (forall y, T y w -> nat) -> nat with 
                    | (O,_) => fun frec => 1
@@ -85,8 +86,8 @@ apply af_cofmap with (f := fun z => (fst z + snd z)%nat). apply leq_af.
 (* prove intersection emptyness *)
 intros x y (CT,H).
 assert (fst x + snd x < fst y + snd y). clear H.
-induction CT. unfold T in *. firstorder. unfold T in *. omega.
-unfold R in *. omega.
+induction CT. unfold T in *. lia. unfold T in *. lia.
+unfold R in *. lia.
 (* give the functional *) 
 refine (fun x => match x as w return (forall y, T y w -> nat) -> nat with 
                    | (O,_) => fun frec => 1
@@ -96,8 +97,6 @@ refine (fun x => match x as w return (forall y, T y w -> nat) -> nat with
 Defined.
 
 End Ranking.
-
-
 
 Section ArgFlip.
 
@@ -112,25 +111,26 @@ Definition flip2 : forall (x:nat*nat), nat.
 pose (T x y := fst x < snd y /\ snd x < fst y).
 pose (R x y := fst x <= fst y /\ snd x <= snd y).
 eapply af_power_induction with (T := T) (R := R) (k := 2).
-omega.
+lia.
 (* prove almost_full *) 
 apply af_intersection. apply af_cofmap. apply leq_af.
 apply af_cofmap; apply leq_af.
 (* prove (power 2) intersection emptyness *)
 intros x y (CT,Ryx). induction CT. 
   unfold T in *; unfold R in *. simpl in H. destruct H. destruct H.
-  destruct H. destruct H0. destruct H0. destruct H0. destruct Ryx. subst x1. firstorder.
+  destruct H. destruct H0. destruct H0. destruct H0. destruct Ryx. subst x1. lia.
   assert (fst x < fst y /\ snd x < snd y). simpl in H. destruct H.
   unfold T in H. destruct H. destruct H0. destruct H0.
-  clear CT. clear IHCT. subst x1. clear Ryx. destruct H; destruct H0. firstorder.
-  unfold R in *. clear CT. firstorder.
+  clear CT. clear IHCT. subst x1. clear Ryx. destruct H; destruct H0. lia.
+  unfold R in *. clear CT. lia.
 (* give the functional *) 
 refine (fun x => match x as w 
                  return (forall y, T y w -> nat) -> nat with
                  | (O,_) => fun frec => 1
                  | (_,O) => fun frec => 1 
                  | (S x, S y) => fun frec => frec (y,x) _
-                end); firstorder.
+                end).
+unfold T in *. auto with arith.
 Defined.
 
 End ArgFlip.
@@ -158,10 +158,10 @@ intros x y T2.
 destruct T2 as (z,(Txz,(z0,(Tzz0,Zeq)))). unfold T in *.
 simpl in Zeq.
 destruct Txz as [T1 | T2]; destruct Tzz0 as [S1 | S2]; subst z0.
-right; left; firstorder.
-left; firstorder.
-right; left; firstorder.
-right; right; firstorder.
+right; left; lia.
+left; lia.
+right; left; lia.
+right; right; lia.
 Defined.
 
 Lemma T2_ct_invariant: 
@@ -177,26 +177,26 @@ apply T2_invariant; assumption.
 remember (T2_invariant H) as G; clear HeqG CT H.
 destruct G as [G1 | [G2 | G3]]; destruct IHCT as [IH1 | [IH2 | IH3]].
 (* a little combinatorial search *)
-  left; firstorder. 
-  right; left; firstorder.
-  left; firstorder.
-  left; firstorder.
-  right; left; firstorder.
-  right; left; firstorder.
-  left; firstorder.
-  right; left; firstorder.
-  right; right; firstorder.
+  left; lia. 
+  right; left; lia.
+  left; lia.
+  left; lia.
+  right; left; lia.
+  right; left; lia.
+  left; lia.
+  right; left; lia.
+  right; right; lia.
 Defined.
 
 (*=GNLex *)
 Definition gnlex_pow2 : forall (x:nat*nat), nat.
-apply af_power_induction with (T:=T) (R:=R) (k:=2). omega.
+apply af_power_induction with (T:=T) (R:=R) (k:=2). lia.
 (* prove almost_full *) 
 apply af_intersection; 
    repeat (apply af_cofmap; apply leq_af).
 (* prove intersection emptyness *) 
 intros x y (CT,HR).
-destruct (T2_ct_invariant CT); repeat firstorder.
+destruct (T2_ct_invariant CT); firstorder; lia.
 (* give the functional *) 
 refine (fun x => match x as w 
          return (forall y, T y w -> nat) -> nat with
@@ -204,8 +204,8 @@ refine (fun x => match x as w
          | (_,O) => fun frec => 1 
          | (S x, S y) => fun frec => (frec (S y, y) _ + frec (S y, x) _)%nat
                 end).
-unfold T in *. left. simpl; omega.
-unfold T in *. right. simpl; omega.
+unfold T in *. left. simpl; lia.
+unfold T in *. right. simpl; lia.
 Defined.
 (*=End *)
 
@@ -217,14 +217,14 @@ assert (T x y \/ clos_trans_1n (nat*nat) (power 2 T) x y \/
         exists z, T x z /\ clos_trans_1n _ (power 2 T) z y).
 Focus 2.
 destruct H.
-destruct H. destruct HR. firstorder.
-destruct HR. firstorder.
+destruct H. destruct HR. lia.
+destruct HR. lia.
 destruct H.
-destruct (T2_ct_invariant H). destruct HR. firstorder.
-destruct HR. firstorder.
+destruct (T2_ct_invariant H). destruct HR. lia.
+destruct HR. lia.
 destruct H. destruct H.
-destruct (T2_ct_invariant H0). firstorder.
-firstorder.
+destruct (T2_ct_invariant H0). firstorder; lia.
+firstorder; lia.
 clear HR.
 induction CT. left; auto.
 destruct IHCT. right. left. constructor. exists y. auto. split. apply H. 
@@ -236,8 +236,6 @@ right. left. constructor 2 with (y := x0).
 exists y. split. apply H. exists x0. split. auto. simpl. reflexivity.
 apply H1.
 Defined.
-
-
 
 (*=GNLexSimple *)
 Definition gnlex: forall (x:nat*nat), nat.
@@ -255,8 +253,8 @@ refine (fun x => match x as w
          | (_,O) => fun frec => 1 
          | (S x, S y) => fun frec => (frec (S y, y) _ + frec (S y, x) _)%nat
                 end).
-unfold T in *. left. simpl; omega.
-unfold T in *. right. simpl; omega.
+unfold T in *. left. simpl; lia.
+unfold T in *. right. simpl; lia.
 Defined.
 (*=End *)
 
@@ -286,7 +284,7 @@ induction H.
   subst.
   inversion H2.
   subst.
-  firstorder.
+  lia.
   unfold Rfsum in H0. unfold sum_lift in H0.
  destruct H1. destruct H. destruct H. destruct H1. subst.
  destruct y; auto.
@@ -297,7 +295,7 @@ induction H.
  simpl in H2.
  inversion H2.
  subst.
- firstorder.
+ lia.
  destruct H1.
  destruct H1.
  simpl in H2.
@@ -337,7 +335,7 @@ induction H.
       subst.
       inversion H2.
       subst.
-      firstorder.
+      lia.
       destruct H2.
       destruct H2.
       subst.
@@ -410,7 +408,7 @@ induction H.
      inversion H.
      inversion H1.
      subst.
-     firstorder.
+     lia.
      destruct H1.
      destruct H.
      inversion H.
@@ -424,7 +422,7 @@ Qed.
 (*=FSum *)
 Definition fsum: forall (x:nat+nat), nat.
 apply af_power_induction 
-  with (T := Tfsum) (R := Rfsum) (k := 2). omega.
+  with (T := Tfsum) (R := Rfsum) (k := 2). lia.
 (* prove almost_full *)
 apply af_sum_lift. apply leq_af. apply leq_af.
 (* prove intersection emptyness *)
@@ -469,21 +467,20 @@ Lemma funny_compare_lemma:
                 funny_compare x y.
 intros. induction H.
 destruct x; destruct y; unfold funny_compare in *; simpl in *.
-unfold TA in *; firstorder.
-unfold SA in *; firstorder.
-unfold SB in *; firstorder.
-unfold TB in *; firstorder.
+unfold TA in *; lia.
+unfold SA in *; lia.
+unfold SB in *; lia.
+unfold TB in *; lia.
 destruct x; destruct y; destruct z; unfold funny_compare in *; simpl in *.
-unfold TA in *; firstorder.
-unfold TA in *; firstorder.
-unfold SA in *; firstorder.
-unfold SA in *; firstorder.
-unfold SB in *; firstorder.
-unfold SB in *; firstorder.
-unfold TB in *; firstorder.
-unfold TB in *; firstorder.
+unfold TA in *; lia.
+unfold TA in *; lia.
+unfold SA in *; lia.
+unfold SA in *; lia.
+unfold SB in *; lia.
+unfold SB in *; lia.
+unfold TB in *; lia.
+unfold TB in *; lia.
 Defined.
-
 
 Definition f_and_g : (nat -> nat) * (nat -> nat).
 eapply af_mut_induction 
@@ -497,32 +494,32 @@ apply af_sum_lift; apply leq_af.
 (* prove intersection emptyness *)
 intros x y (CTxy,Ryx). 
 induction CTxy. destruct x; destruct y; unfold lift_rel_union in *; unfold sum_lift in *.
-   unfold TA in *; firstorder. destruct Ryx. destruct Ryx. 
-   unfold TB in *; firstorder.
+   unfold TA in *; lia. destruct Ryx. destruct Ryx. 
+   unfold TB in *; lia.
 assert (funny_compare y z). apply funny_compare_lemma. apply CTxy; clear CTxy.
 destruct x; destruct y; destruct z; unfold funny_compare in *; simpl in *.
-unfold TA in *; firstorder. 
-unfold sum_lift in *; firstorder. 
+unfold TA in *; firstorder.
+unfold sum_lift in *; firstorder; lia.
 unfold TA in *; firstorder.
 unfold SA in *; firstorder.
-unfold sum_lift in *; firstorder.
-unfold sum_lift in *; firstorder.
-unfold SA in *; firstorder. 
+unfold sum_lift in *; firstorder; lia.
+unfold sum_lift in *; firstorder; lia.
+unfold SA in *; firstorder; lia.
+unfold SB in *; firstorder; lia.
 unfold SB in *; firstorder.
-unfold SB in *; firstorder. 
-unfold sum_lift in *; firstorder.
-unfold TB in *; firstorder. 
-unfold TB in *; firstorder.
+unfold sum_lift in *; firstorder; lia.
+unfold TB in *; firstorder; lia.
+unfold TB in *; firstorder; lia.
 (* give the functionals *)
   refine (fun x => match x as w return (forall y, TA y w -> nat) -> (forall y, SB y w -> nat) -> nat with 
                     | O   => fun self_rec other_rec => 1 
                     | S x => fun self_rec other_rec => (@self_rec x _ + @other_rec (S (S x)) _)%nat
-                   end). firstorder. unfold TA. firstorder. unfold SB. auto.
+                   end). unfold TA. lia. unfold SB. auto.
   refine (fun x => match x as w return (forall y, TB y w -> nat) -> (forall y, SA y w -> nat) -> nat with 
                     | O       => fun self_rec other_rec => 1
                     | S O     => fun self_rec other_rec => 1 
                     | S (S x) => fun self_rec other_rec => @other_rec x _
-                   end). firstorder. 
+                   end). firstorder.
 Defined.
 
 End MutualInduction.

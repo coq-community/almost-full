@@ -1,6 +1,6 @@
 Require Import Wf_nat.
 Require Import Arith.
-Require Import Omega.
+Require Import Lia.
 Require Import Wellfounded.
 Require Import List.
 Require Import Relations.
@@ -13,6 +13,7 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Set Printing Implicit Defensive.
 Set Transparent Obligations.
+
 
 (****************************************************************
  *                                                              * 
@@ -36,7 +37,6 @@ apply well_founded_induction with (R :=T).
 apply wf_from_af with (R := R). apply Disj. apply AF.
 apply g. Defined.
 
-
 (* A very simple test that the fixpoint combinator /indeed/ gives us a fixpoint *)
 (*=Fibonacci *)
 Definition fib : nat -> nat.
@@ -44,7 +44,7 @@ apply af_induction with (T := lt) (R := le).
 (* (i) Prove <= is AF *)
 apply leq_af.
 (* (ii) Prove intersection emptyness *)
-intros x y (CT,H). induction CT; repeat firstorder.
+intros x y (CT,H). induction CT; try lia.
 (* (iii) Give the functional *)
 refine (fun x => 
   match x as w return (forall y, y < w -> nat) -> nat with 
@@ -53,6 +53,7 @@ refine (fun x =>
     | (S (S x)) => fun frec => (frec (S x) _ + frec x _)%nat
   end); firstorder.
 Defined.
+
 (*=End *)
 
 Eval compute in (fib 0). (* 1 *) 
@@ -91,11 +92,12 @@ Fixpoint plus_mod_aux k n (x:nat) :=
 Lemma plus_mod_aux_fin k n (x:nat):
   (x < k) -> plus_mod_aux k n x < k.
 generalize dependent k. generalize dependent x.
-induction n. auto. intros. simpl. destruct k. firstorder.
+induction n. auto. intros. simpl. destruct k. lia.
 simpl. destruct (eq_nat_dec (S k) (S x)). auto. inversion e.
-rewrite minus_diag.  apply IHn. auto. firstorder.
-assert (k - x <> O). omega. set (k - x) as diff. destruct diff. firstorder.
-apply IHn. firstorder. Defined.
+rewrite minus_diag.  apply IHn. auto. lia.
+assert (k - x <> O). lia. set (k - x) as diff.
+fold diff in H0. destruct diff. firstorder.
+apply IHn. lia. Defined.
 
 
 Lemma plus_mod k (n:nat) (x:Finite k) : Finite k.
@@ -107,24 +109,24 @@ Lemma plus_mod_lt (m:nat):
   forall k n, m+n < k -> plus_mod_aux k m n = (m+n)%nat.
 induction m. firstorder. intros. simpl. 
 remember (k - S n) as j. 
-destruct j. firstorder. firstorder. simpl. 
-assert (S (m + n) = (m + (S n))%nat). Focus 2. rewrite H0. apply IHm. firstorder.
-firstorder. Defined.
+destruct j. lia.
+assert (S (m + n) = (m + (S n))%nat). Focus 2. rewrite H0. apply IHm. lia.
+lia. Defined.
 
 Lemma plus_mod_gt (m:nat): 
    forall k x, k > 0 -> m < k -> x < k -> k <= m+x -> plus_mod_aux k m x = m + x - k.
 induction m.
-firstorder.
+lia.
 intros. 
 simpl. remember (k - S x) as diff. destruct diff.
-destruct k. firstorder. simpl. 
-assert (x = k). firstorder. subst x.
-assert (plus_mod_aux (S k) m O = (m + O)%nat). apply plus_mod_lt. firstorder.
-rewrite H3. firstorder.
-destruct k. firstorder.
+destruct k. lia.
+assert (x = k). lia. subst x.
+assert (plus_mod_aux (S k) m O = (m + O)%nat). apply plus_mod_lt. lia.
+rewrite H3. lia.
+destruct k. lia.
 assert (plus_mod_aux (S k) m (S x) = m + (S x) - (S k)).
-apply IHm. firstorder. firstorder. firstorder. firstorder.
-rewrite H3. omega.
+apply IHm. lia. lia. lia. lia.
+rewrite H3. lia.
 Defined.
 
 Lemma plus_mod_diff: 
@@ -132,26 +134,25 @@ Lemma plus_mod_diff:
 intros.
 destruct (le_lt_dec k (m+x)).
 assert (plus_mod_aux k m x = m + x - k). 
-apply plus_mod_gt. omega. omega. omega. omega.
-rewrite H3. omega.
-assert (plus_mod_aux k m x = (m + x)%nat). apply plus_mod_lt. omega. 
-rewrite H3. omega.
+apply plus_mod_gt. lia. lia. lia. lia.
+rewrite H3. lia.
+assert (plus_mod_aux k m x = (m + x)%nat). apply plus_mod_lt. lia. 
+rewrite H3. lia.
 Defined.
 
 Lemma plus_mod_wraparound (m:nat):
  forall x n, x < m -> n > 0 -> 
      plus_mod_aux (n + m) m (n + x) = x.
-induction m. firstorder. intros. simpl.
+induction m. lia. intros. simpl.
 remember (n + S m - (S (n + x))) as diff.
-destruct diff. firstorder. 
-assert (m = x). firstorder. rewrite H1.
-assert (plus_mod_aux (n + S x) x O = (x + O)%nat). apply plus_mod_lt. firstorder.
-firstorder. 
-simpl.
+destruct diff. 
+assert (m = x). lia. rewrite H1.
+assert (plus_mod_aux (n + S x) x O = (x + O)%nat). apply plus_mod_lt. lia.
+lia.
 assert (plus_mod_aux (S n + m) m (S n + x) = x).
-apply IHm. firstorder. firstorder. firstorder. 
-assert ((S n + m)%nat = (n + S m)%nat). firstorder. rewrite <- H2.
-assert (S (n+x) = (S n + x)%nat). firstorder. rewrite H3. apply H1.
+apply IHm. lia. lia. 
+assert ((S n + m)%nat = (n + S m)%nat). lia. rewrite <- H2.
+assert (S (n+x) = (S n + x)%nat). lia. rewrite H3. apply H1.
 Defined.
 
 Lemma plus_mod_suc m: 
@@ -197,10 +198,10 @@ exists 1. split. firstorder. split. destruct H. destruct H. destruct H. subst k.
 unfold plus_mod. unfold fst. unfold eq_fin. auto. unfold plus_mod_aux. simpl. 
 rewrite minus_diag. apply H1. unfold plus_mod. unfold fst. unfold eq_fin.
 auto. unfold plus_mod_aux. remember (k - S kx) as diff. destruct diff.
-firstorder. firstorder. right. split. firstorder. 
+lia. lia. right. split. lia. 
 exists (@FinIntro k ky Hy, y).
-split. simpl. exists y. auto. firstorder.
-simpl. auto. firstorder. 
+split. simpl. exists y. firstorder.
+simpl. apply rt_refl.
 destruct IHCT as (m,(MltK,(HEqfin,G))).
 destruct G. destruct H0. subst m.
 destruct x as ((kx,Hx),x).
@@ -209,11 +210,11 @@ destruct z as ((kz,Hz),z).
 unfold fst in *. unfold snd in *. unfold lift_diag in H. unfold fst in *. unfold snd in *.
 simpl in H. unfold next_fin in H. destruct H. 
 unfold plus_mod in HEqfin. unfold eq_fin in HEqfin. 
-exists (S O). split. firstorder. split. unfold plus_mod. unfold eq_fin.
+exists (S O). split. lia. split. unfold plus_mod. unfold eq_fin.
 destruct H. destruct H. subst ky.  simpl in HEqfin. subst kz. simpl.
-remember (k - S kx) as diff. destruct diff. auto. firstorder. simpl.
+remember (k - S kx) as diff. destruct diff. auto. lia. simpl.
 destruct H. subst ky.  simpl in HEqfin. subst kz.
-remember (k - S kx) as diff. destruct diff. firstorder. reflexivity.
+remember (k - S kx) as diff. destruct diff. lia. reflexivity.
 right. split. auto. 
 exists (@FinIntro k ky Hy,y). split. simpl. exists y. split. apply H0. reflexivity.
 apply ctr_from_ct. apply H1.
@@ -221,7 +222,7 @@ destruct H0. destruct H1. destruct H1.
 
 destruct (eq_nat_dec k (S m)).
   (* Case that we have to wrap-around *)
-exists O. split. firstorder. split.
+exists O. split. lia. split.
 Focus 2. left.
 assert (power k T (snd x) (snd x0)).
 subst k. simpl. exists (snd y). split. destruct H. apply H3.
@@ -238,13 +239,13 @@ unfold plus_mod. simpl. unfold eq_fin. unfold fst in HEqfin.
 unfold plus_mod in HEqfin. unfold eq_fin in HEqfin. subst kz. subst k. 
 unfold lift_diag in H. unfold fst in H. unfold snd in H. unfold next_fin in H.
 simpl in H. destruct H. destruct H. destruct H. subst ky. inversion H.
-assert (plus_mod_aux (S m) m O = (m + O)%nat). apply plus_mod_lt. firstorder.
+assert (plus_mod_aux (S m) m O = (m + O)%nat). apply plus_mod_lt. lia.
 rewrite H4. auto. destruct H. subst ky. 
-apply plus_mod_suc. firstorder. 
+apply plus_mod_suc. lia. 
   (* No wraparound needed here *)
 Show. 
-exists (S m). split.  firstorder.
-split. Focus 2. right. split. firstorder. 
+exists (S m). split.  lia.
+split. Focus 2. right. split. lia. 
 exists x0. split. simpl. exists (snd y). split. destruct H. apply H3.
 apply H1. apply H2.
 
@@ -257,7 +258,7 @@ unfold lift_diag in H. unfold fst in H. unfold snd in H. destruct H.
 unfold next_fin in H. destruct H. destruct H. subst. 
 simpl. rewrite minus_diag. reflexivity. simpl.
 destruct H. subst ky. 
-remember (k - S kx) as diff. destruct diff. firstorder. reflexivity.
+remember (k - S kx) as diff. destruct diff. lia. reflexivity.
 Defined.
 
 Lemma diag_pow_decomp_mod k X T: 
@@ -274,7 +275,6 @@ right. destruct H1. destruct x. destruct y. unfold plus_mod in H0. unfold fst in
 destruct f. destruct f0. unfold eq_fin in *. subst x2.
 apply plus_mod_diff. firstorder. firstorder. firstorder. apply H.
 Defined.
-
 
 Lemma af_power_induction_non_trivial: 
   forall (A:Set) k
@@ -296,7 +296,7 @@ intros x y (CTxy,Tyx).
 induction CTxy. unfold lift_diag in H. unfold lift_pointwise in Tyx.
 unfold next_fin in H.
 destruct x. destruct y. simpl in H. destruct f. destruct f0. simpl in Tyx.
-destruct H. unfold eq_fin in H. unfold eq_fin in Tyx. firstorder.
+destruct H. unfold eq_fin in H. unfold eq_fin in Tyx. lia.
 destruct x as ((kx,Hx),x).
 destruct y as ((ky,Hy),y).
 destruct z as ((kz,Hz),z).
@@ -311,20 +311,20 @@ unfold lift_diag. unfold fst. unfold snd. split. unfold next_fin.
 apply H2. apply H4. apply CTxy.
 destruct (diag_pow_decomp_mod kGt H). simpl in H0.
 destruct H0. left. split. apply H0. unfold eq_fin in H1. apply H1.
-unfold eq_fin in H0. unfold fst in H0. right. apply H0.
+unfold eq_fin in H0. unfold fst in H0. right. apply H0. 
 firstorder.
 (* Functional requirement *)
 intros. destruct x as ((kx,Hx),x). unfold snd.
 apply frec. intros. 
 destruct kx.
   (* kx = O *) 
-  assert (k-1 < k). omega.
+  assert (k-1 < k). lia.
   intros. apply (H (@FinIntro k (k-1) H1,y)). simpl. 
-  unfold lift_diag. unfold fst. unfold snd. split. unfold next_fin. omega. apply H0.
+  unfold lift_diag. unfold fst. unfold snd. split. unfold next_fin. lia. apply H0.
   (* Now it is an (S kx) *) 
-  assert (kx < k). omega.
+  assert (kx < k). lia.
   intros. apply (H (@FinIntro k kx H1,y)). simpl. unfold lift_diag. simpl. split. 
-  simpl. unfold next_fin. right. omega. apply H0.
+  simpl. unfold next_fin. right. lia. apply H0.
 (* Show the goal *)
 intros. apply frec. intros. apply (H (@FinIntro k 1 kGt, y)).
 Defined.
@@ -342,15 +342,15 @@ Lemma af_power_induction:
   forall x, P x.
 (*=End *)
 intros.
-destruct (le_lt_dec k 1). assert (k = 1); firstorder. 
+destruct (le_lt_dec k 1). assert (k = 1). lia. 
 apply af_induction with (T := T) (R := R). apply H0. 
-intros. eapply H1. split. Focus 2. destruct H4. apply r.
+intros. eapply H1. split. Focus 2. destruct H4. apply r. 
 subst k. simpl. 
 destruct H4. clear H4 H H1 l. induction H3. constructor. exists y. auto.
 constructor 2 with (y := y). exists y. auto. auto.
 apply H2. 
 apply af_power_induction_non_trivial with (k := k) (T := T) (R := R).
-firstorder. assumption. assumption. assumption.
+lia. assumption. assumption. assumption.
 Defined.
 
 

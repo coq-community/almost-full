@@ -1,6 +1,6 @@
 Require Import Wf_nat.
 Require Import Arith.
-Require Import Omega.
+Require Import Lia.
 Require Import Wellfounded.
 Require Import List.
 Require Import Relations.
@@ -222,9 +222,10 @@ unfold almost_full.
 cut (dec_rel lt). intro decLt.
 eexists (SUP (af_tree lt_wf decLt)).
  eapply sec_strengthen. Focus 2. apply secure_from_wf. 
-intros. firstorder. 
+intros. simpl in H. lia.
 unfold dec_rel. intros. destruct (le_lt_dec x y).
-firstorder. firstorder.
+left; lia.
+right; lia.
 Defined.
 
 

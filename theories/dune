@@ -1,0 +1,6 @@
+(coq.theory
+ (name AlmostFull)
+ (package coq-almost-full)
+ (synopsis "Almost-full relations in Coq for proving termination"))
+
+(include_subdirs qualified)
