@@ -1,6 +1,5 @@
 Require Import Wf_nat.
 Require Import Arith.
-Require Import Omega.
 Require Import Wellfounded.
 Require Import List.
 Require Import Relations.
