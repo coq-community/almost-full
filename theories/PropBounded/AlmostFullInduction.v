@@ -116,7 +116,7 @@ lia. Defined.
 Lemma plus_mod_gt (m:nat): 
    forall k x, k > 0 -> m < k -> x < k -> k <= m+x -> plus_mod_aux k m x = m + x - k.
 induction m.
-lia.
+intros; lia.
 intros. 
 simpl. remember (k - S x) as diff. destruct diff.
 destruct k. lia.
@@ -143,7 +143,7 @@ Defined.
 Lemma plus_mod_wraparound (m:nat):
  forall x n, x < m -> n > 0 -> 
      plus_mod_aux (n + m) m (n + x) = x.
-induction m. lia. intros. simpl.
+induction m. intros; lia. intros. simpl.
 remember (n + S m - (S (n + x))) as diff.
 destruct diff. 
 assert (m = x). lia. rewrite H1.
@@ -322,9 +322,9 @@ destruct kx.
   intros. apply (H (@FinIntro k (k-1) H1,y)). simpl. 
   unfold lift_diag. unfold fst. unfold snd. split. unfold next_fin. lia. apply H0.
   (* Now it is an (S kx) *) 
-  assert (kx < k). lia.
+  assert (kx < k). intuition; lia.
   intros. apply (H (@FinIntro k kx H1,y)). simpl. unfold lift_diag. simpl. split. 
-  simpl. unfold next_fin. right. lia. apply H0.
+  simpl. unfold next_fin. right. intuition lia. apply H0.
 (* Show the goal *)
 intros. apply frec. intros. apply (H (@FinIntro k 1 kGt, y)).
 Defined.
