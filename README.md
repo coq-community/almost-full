@@ -17,7 +17,7 @@ Theorem, useful for proving termination.
   - Dimitrios Vytiniotis (initial)
   - Thierry Coquand (initial)
   - David Wahlstedt (initial)
-- License: [Unknown](LICENSE)
+- License: [MIT License](LICENSE)
 - Compatible Coq versions: 8.11 or later
 - Additional dependencies: none
 - Coq namespace: `AlmostFull`

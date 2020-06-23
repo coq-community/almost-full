@@ -5,16 +5,16 @@ version: "dev"
 homepage: "https://github.com/palmskog/almost-full"
 dev-repo: "git+https://github.com/palmskog/almost-full.git"
 bug-reports: "https://github.com/palmskog/almost-full/issues"
-license: "unknown"
+license: "MIT"
 
 synopsis: "Almost-full relations in Coq for proving termination"
 description: """
 Coq development of almost-full relations, including the Ramsey
 Theorem, useful for proving termination."""
 
-build: [make "-j%{jobs}%" ]
-install: [make "install"]
+build: ["dune" "build" "-p" name "-j" jobs]
 depends: [
+  "dune" {>= "2.5"}
   "coq" {(>= "8.11" & < "8.13~") | (= "dev")}
 ]
 
