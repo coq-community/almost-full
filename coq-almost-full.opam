@@ -2,9 +2,9 @@ opam-version: "2.0"
 maintainer: "palmskog@gmail.com"
 version: "dev"
 
-homepage: "https://github.com/palmskog/almost-full"
-dev-repo: "git+https://github.com/palmskog/almost-full.git"
-bug-reports: "https://github.com/palmskog/almost-full/issues"
+homepage: "https://github.com/coq-community/almost-full"
+dev-repo: "git+https://github.com/coq-community/almost-full.git"
+bug-reports: "https://github.com/coq-community/almost-full/issues"
 license: "MIT"
 
 synopsis: "Almost-full relations in Coq for proving termination"

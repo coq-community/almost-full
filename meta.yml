@@ -1,8 +1,8 @@
 ---
 fullname: Almost Full
 shortname: almost-full
-organization: palmskog
-community: false
+organization: coq-community
+community: true
 travis: true
 coqdoc: false
 dune: true
@@ -26,6 +26,10 @@ authors:
   initial: true
 - name: David Wahlstedt
   initial: true
+
+maintainers:
+- name: Karl Palmskog
+  nickname: palmskog
 
 opam-file-maintainer: palmskog@gmail.com
 
@@ -61,7 +65,7 @@ build: |-
  ## Building instructions
 
  ``` shell
- git clone https://github.com/palmskog/almost-full
+ git clone https://github.com/coq-community/almost-full
  cd almost-full
  make   # or make -j <number-of-cores-on-your-machine>
  ```
