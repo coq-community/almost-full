@@ -556,7 +556,6 @@ Defined.
 
 (* Finite natural values in the range [0 ... k-1] that is, k inhabitants *)
 Inductive Finite (k:nat) : Set := FinIntro x (_ : x < k).
-Print Finite.
 
 Definition next_fin k (x : Finite k) (y : Finite k) := 
   match (x,y) with 

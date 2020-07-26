@@ -44,7 +44,7 @@ induction p.
   intros. destruct H2. 
      left;  auto. 
      right; auto.
-Qed.
+Defined.
 
 (* SecureBy implies that every infinite chain has two related elements *) 
 (*=InfiniteChain *)
@@ -153,7 +153,7 @@ eapply H1. eapply trans_clos_left. apply HT.
 apply H2. split. apply H3. apply H4.
 eapply H1. apply rt_refl. split. Focus 2. apply H4. Focus 1.
 eapply trans_clos_left_aux. apply HT. apply H2. 
-Qed.
+Defined.
 
 (*=WfFromAf *)
 Lemma wf_from_af : 

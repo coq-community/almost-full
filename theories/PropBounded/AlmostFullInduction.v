@@ -64,6 +64,7 @@ Eval compute in (fib 4). (* 5 *)
 Eval compute in (fib 5). (* 8 *)
 
 
+
 (****************************************************************
  *                                                              * 
  * A principle more akin to size-change-termination             *
@@ -242,8 +243,7 @@ simpl in H. destruct H. destruct H. destruct H. subst ky. inversion H.
 assert (plus_mod_aux (S m) m O = (m + O)%nat). apply plus_mod_lt. lia.
 rewrite H4. auto. destruct H. subst ky. 
 apply plus_mod_suc. lia. 
-  (* No wraparound needed here *)
-Show. 
+(* No wraparound needed here *)
 exists (S m). split.  lia.
 split. Focus 2. right. split. lia. 
 exists x0. split. simpl. exists (snd y). split. destruct H. apply H3.
@@ -372,8 +372,6 @@ destruct y as [yl|yr]. apply (SB xr yl). apply (TB xr yr).
 Defined. 
 
 (*=AfInduction *)
-
-Check clos_trans_1n.
 
 Lemma af_mut_induction_aux:
    forall (A:Set) (B:Set) 
