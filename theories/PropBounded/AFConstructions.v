@@ -6,7 +6,7 @@ Require Import List.
 Require Import Relations.
 Require Import Logic.
 
-From AlmostFull.PropBounded Require Import AlmostFull.
+From AlmostFull Require Import PropBounded.AlmostFull.
 
 Set Implicit Arguments.
 Unset Strict Implicit.

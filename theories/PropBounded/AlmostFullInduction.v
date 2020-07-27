@@ -6,8 +6,8 @@ Require Import List.
 Require Import Relations.
 Require Import Logic.
 
-From AlmostFull.PropBounded Require Import AlmostFull.
-From AlmostFull.PropBounded Require Import AFConstructions.
+From AlmostFull Require Import PropBounded.AlmostFull.
+From AlmostFull Require Import PropBounded.AFConstructions.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
