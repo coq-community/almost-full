@@ -4,6 +4,7 @@
 [![Contributing][contributing-shield]][contributing-link]
 [![Code of Conduct][conduct-shield]][conduct-link]
 [![Zulip][zulip-shield]][zulip-link]
+[![DOI][doi-shield]][doi-link]
 
 [travis-shield]: https://travis-ci.com/coq-community/almost-full.svg?branch=master
 [travis-link]: https://travis-ci.com/coq-community/almost-full/builds
@@ -18,6 +19,8 @@
 [zulip-link]: https://coq.zulipchat.com/#narrow/stream/237663-coq-community-devs.20.26.20users
 
 
+[doi-shield]: https://zenodo.org/badge/DOI/10.1007/978-3-642-32347-8_17.svg
+[doi-link]: https://doi.org/10.1007/978-3-642-32347-8_17
 
 Coq development of almost-full relations, including the Ramsey
 Theorem, useful for proving termination.
@@ -28,6 +31,7 @@ Theorem, useful for proving termination.
   - Dimitrios Vytiniotis (initial)
   - Thierry Coquand (initial)
   - David Wahlstedt (initial)
+
 - Coq-community maintainer(s):
   - Karl Palmskog ([**@palmskog**](https://github.com/palmskog))
 - License: [MIT License](LICENSE)
