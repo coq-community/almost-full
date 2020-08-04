@@ -25,15 +25,15 @@ Set Transparent Obligations.
 
 (*=AfInduction *)
 Theorem af_induction:
-   forall (A:Set) (T : A -> A -> Prop) (R : A -> A -> Prop), 
+   forall (A:Type) (T : A -> A -> Prop) (R : A -> A -> Prop), 
    almost_full R -> 
    (forall x y, clos_trans_1n A T x y /\ R y x -> False) -> 
-   forall P : A -> Set, 
+   forall P : A -> Type, 
          (forall x, (forall y, T y x -> P y) -> P x)
           -> forall a, P a.
 (*=End *)
 intros A T R AF Disj P g.
-apply well_founded_induction with (R :=T).
+apply well_founded_induction_type with (R :=T).
 apply wf_from_af with (R := R). apply Disj. apply AF.
 apply g. Defined.
 
@@ -277,12 +277,12 @@ apply plus_mod_diff. firstorder. firstorder. firstorder. apply H.
 Defined.
 
 Lemma af_power_induction_non_trivial: 
-  forall (A:Set) k
+  forall (A:Type) k
   (T : A -> A -> Prop) 
   (R : A -> A -> Prop), 
   k > 1 -> almost_full R -> 
  (forall x y, @clos_trans_1n _ (power k T) x y /\ R y x -> False) -> 
- forall P : A -> Set, 
+ forall P : A -> Type, 
  (forall x, (forall y, T y x -> P y) -> P x) -> 
  forall x, P x.
 intros X k T R kGt afR Hct P frec.
@@ -319,36 +319,36 @@ apply frec. intros.
 destruct kx.
   (* kx = O *) 
   assert (k-1 < k). lia.
-  intros. apply (H (@FinIntro k (k-1) H1,y)). simpl. 
-  unfold lift_diag. unfold fst. unfold snd. split. unfold next_fin. lia. apply H0.
+  intros. apply (X0 (@FinIntro k (k-1) H0,y)). simpl. 
+  unfold lift_diag. unfold fst. unfold snd. split. unfold next_fin. lia. apply H.
   (* Now it is an (S kx) *) 
   assert (kx < k). intuition; lia.
-  intros. apply (H (@FinIntro k kx H1,y)). simpl. unfold lift_diag. simpl. split. 
-  simpl. unfold next_fin. right. intuition lia. apply H0.
+  intros. apply (X0 (@FinIntro k kx H0,y)). simpl. unfold lift_diag. simpl. split. 
+  simpl. unfold next_fin. right. intuition lia. apply H.
 (* Show the goal *)
-intros. apply frec. intros. apply (H (@FinIntro k 1 kGt, y)).
+intros. apply frec. intros. apply (X0 (@FinIntro k 1 kGt, y)).
 Defined.
 
 
 (*=AfPowerInduction *)
 Lemma af_power_induction: 
-  forall (A:Set) k
+  forall (A:Type) k
   (T : A -> A -> Prop) (R : A -> A -> Prop), 
   k >= 1 -> almost_full R -> 
   (forall x y,
     clos_trans_1n A (power k T) x y /\ R y x -> False) -> 
-  forall P : A -> Set, 
+  forall P : A -> Type, 
   (forall x, (forall y, T y x -> P y) -> P x) -> 
   forall x, P x.
 (*=End *)
 intros.
 destruct (le_lt_dec k 1). assert (k = 1). lia. 
 apply af_induction with (T := T) (R := R). apply H0. 
-intros. eapply H1. split. Focus 2. destruct H4. apply r. 
+intros. eapply H1. split. Focus 2. destruct H3. apply r. 
 subst k. simpl. 
-destruct H4. clear H4 H H1 l. induction H3. constructor. exists y. auto.
+destruct H3. clear H3 H H1 l. induction H2. constructor. exists y. auto.
 constructor 2 with (y := y). exists y. auto. auto.
-apply H2. 
+apply X. 
 apply af_power_induction_non_trivial with (k := k) (T := T) (R := R).
 lia. assumption. assumption. assumption.
 Defined.
@@ -361,7 +361,7 @@ Defined.
  *                                                              * 
  ****************************************************************)
 
-Definition lift_rel_union (A:Set) (B:Set) 
+Definition lift_rel_union (A:Type) (B:Type) 
                           (TA : A -> A -> Prop) (TB : B -> B -> Prop)
                           (SA : A -> B -> Prop) (SB : B -> A -> Prop) 
                           (x : A + B) 
@@ -374,13 +374,13 @@ Defined.
 (*=AfInduction *)
 
 Lemma af_mut_induction_aux:
-   forall (A:Set) (B:Set) 
+   forall (A:Type) (B:Type) 
           (TA : A -> A -> Prop) (SA : A -> B -> Prop) 
           (TB : B -> B -> Prop) (SB : B -> A -> Prop)
           (R : A + B -> A + B -> Prop),
           almost_full R -> 
           (forall x y, @clos_trans_1n (A+B) (@lift_rel_union _ _ TA TB SA SB) x y /\ R y x -> False) -> 
-          forall (P : A -> Set) (Q : B -> Set),
+          forall (P : A -> Type) (Q : B -> Type),
              (forall x : A, (forall y, TA y x -> P y) ->
                             (forall y, SB y x -> Q y) -> P x) -> 
              (forall x : B, (forall y, TB y x -> Q y) -> 
@@ -392,20 +392,20 @@ Lemma af_mut_induction_aux:
 intros A B TA SA TB SB R Raf HTrans P Q fA fB.
 apply af_induction with (R := R) (T := @lift_rel_union _ _ TA TB SA SB).
 apply Raf. intros. eapply HTrans. apply H. intros.
-destruct x. apply fA. intros. remember (H (inl _ y)). simpl in y0. apply y0. apply H0.
-intros. remember (H (inr _ y)). simpl in y0. apply y0. apply H0.
-apply fB. intros. remember (H (inr _ y)). simpl in y0. apply y0. apply H0.
-intros. remember (H (inl _ y)). simpl in y0. apply y0. apply H0. 
+destruct x. apply fA. intros. remember (X (inl _ y)). simpl in y0. apply y0. apply H.
+intros. remember (X (inr _ y)). simpl in y0. apply y0. apply H.
+apply fB. intros. remember (X (inr _ y)). simpl in y0. apply y0. apply H.
+intros. remember (X (inl _ y)). simpl in y0. apply y0. apply H. 
 Defined.
 
 Lemma af_mut_induction:
-   forall (A:Set) (B:Set) 
+   forall (A:Type) (B:Type) 
           (TA : A -> A -> Prop) (SA : A -> B -> Prop) 
           (TB : B -> B -> Prop) (SB : B -> A -> Prop)
           (R : A + B -> A + B -> Prop),
           almost_full R -> 
           (forall x y, @clos_trans_1n (A+B) (@lift_rel_union _ _ TA TB SA SB) x y /\ R y x -> False) -> 
-          forall (P : A -> Set) (Q : B -> Set),
+          forall (P : A -> Type) (Q : B -> Type),
              (forall x : A, (forall y, TA y x -> P y) ->
                             (forall y, SB y x -> Q y) -> P x) -> 
              (forall x : B, (forall y, TB y x -> Q y) -> 
@@ -416,7 +416,7 @@ assert (forall a:A+B, match a with
                       | inl l => P l 
                       | inr r => Q r
                       end).
-eapply af_mut_induction_aux. apply H. apply H0. apply H1. apply H2.
-split. intros. remember (H3 (inl _ a)). auto. 
-intros. remember (H3 (inr _ b)). auto.
+eapply af_mut_induction_aux. apply H. apply H0. apply X. apply X0.
+split. intros. remember (X1 (inl _ a)). auto. 
+intros. remember (X1 (inr _ b)). auto.
 Defined.

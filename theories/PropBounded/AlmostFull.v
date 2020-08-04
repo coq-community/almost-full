@@ -18,7 +18,7 @@ Set Transparent Obligations.
  ****************************************************************)
 
 (*=Decidable *)
-Definition dec_rel (X:Set) (R:X->X->Prop) := 
+Definition dec_rel (X:Type) (R:X->X->Prop) := 
   forall x y, {not (R y x)} + {R y x}.
 (*=End *)
 
@@ -33,7 +33,7 @@ Inductive almost_full X : (X -> X -> Prop) -> Prop :=
 
 (*=AFStrengthen *)
 Lemma af_strengthen: 
- forall (X:Set) (A : X -> X -> Prop), almost_full A -> 
+ forall (X:Type) (A : X -> X -> Prop), almost_full A -> 
  forall (B : X -> X -> Prop), (forall x y, A x y -> B x y) -> almost_full B.
 (*=End *)
 Proof.
@@ -49,7 +49,7 @@ Defined.
 (* SecureBy implies that every infinite chain has two related elements *) 
 (*=InfiniteChain *)
 Lemma sec_binary_infinite_chain : 
-    forall (X:Set) R (f : nat -> X), almost_full R -> 
+    forall (X:Type) R (f : nat -> X), almost_full R -> 
     forall (k:nat), 
     exists n, exists m, (n > m) /\ (m >= k) /\ R (f m) (f n).
 (*=End *)
@@ -65,7 +65,7 @@ intros X R f p. induction p.
 Defined.
 
 (*=InfiniteChainCorollary *)
-Corollary af_inf_chain (X : Set) (R : X -> X -> Prop): 
+Corollary af_inf_chain (X : Type) (R : X -> X -> Prop): 
    almost_full R -> forall (f : nat -> X), exists n, exists m, (n > m) /\ R (f m) (f n).
 (*=End *)
 intros. 
@@ -82,7 +82,7 @@ Defined.
 
 (* Generalization to an arbitrary decidable well-founded relation *)
 (*=AfTreeIter *)
-Lemma af_iter : forall (X:Set) (R : X -> X -> Prop) 
+Lemma af_iter : forall (X:Type) (R : X -> X -> Prop) 
          (decR : dec_rel R) (x:X) (accX : Acc R x),
          almost_full (fun y z => not (R y x) \/ not (R z y)).
 (*=End *)
@@ -99,15 +99,15 @@ left. right. auto.
 Defined.
 
 (*=AfFromWfCor *)
-Corollary af_from_wf (X:Set) (R : X -> X -> Prop) : 
+Corollary af_from_wf (X:Type) (R : X -> X -> Prop) : 
   well_founded R -> dec_rel R -> almost_full (fun x y => not (R y x)).
 (*=End *)
 intros. 
 apply AF_SUP. intro x.
 assert (Acc R x). apply H.
-remember (@af_iter X R H0 x H1). clear Heqa.
-eapply af_strengthen. apply a. intros. simpl in H2.
-destruct H2.
+remember (@af_iter X R X0 x H0). clear Heqa.
+eapply af_strengthen. apply a. intros. simpl in H1.
+destruct H1.
    right; assumption. 
    left;  assumption.
 Defined.
@@ -134,7 +134,7 @@ Qed.
 
 (*=AccFromAf *)
 Lemma acc_from_af: 
-  forall (X:Set) (R : X -> X -> Prop), 
+  forall (X:Type) (R : X -> X -> Prop), 
   almost_full R -> forall (T : X -> X -> Prop) y, 
   (forall x z, clos_refl_trans X T z y -> 
             clos_trans_1n X T x z /\ R z x -> False) -> Acc T y.
@@ -157,7 +157,7 @@ Defined.
 
 (*=WfFromAf *)
 Lemma wf_from_af : 
-   forall (X:Set) 
+   forall (X:Type) 
    (R : X -> X -> Prop) (T : X -> X -> Prop), 
    (forall x y, clos_trans_1n X T x y /\ R y x -> False) 
     -> almost_full R -> well_founded T.
@@ -173,7 +173,7 @@ intros. apply H0. Defined.
 (* A reassuring lemma *)
 (*=WfFromWqo *)
 Lemma wf_from_wqo : 
-  forall (X:Set) (R : X -> X -> Prop), transitive X R -> almost_full R -> 
+  forall (X:Type) (R : X -> X -> Prop), transitive X R -> almost_full R -> 
   well_founded (fun x y => R x y /\ not (R y x)).
 (*=End *)
 Proof.

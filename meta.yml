@@ -6,6 +6,7 @@ community: true
 travis: true
 coqdoc: false
 dune: true
+doi: 10.1007/978-3-642-32347-8_17
 
 synopsis: >-
   Almost-full relations in Coq for proving termination
@@ -57,6 +58,8 @@ namespace: AlmostFull
 keywords:
 - name: Ramsey theorem
 - name: termination
+- name: almost-full relations
+- name: well-founded relations
 
 categories:
 - name: Computer Science/Data Types and Data Structures

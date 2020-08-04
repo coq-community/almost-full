@@ -15,7 +15,7 @@ Set Printing Implicit Defensive.
 Set Transparent Obligations.
 
 (*=LRel *)
-Definition LRel (X:Set) := list X -> Prop.
+Definition LRel (X:Type) := list X -> Prop.
 (*=End *)
 
 (*=AFLRel *)
@@ -28,7 +28,7 @@ Inductive almost_full_lrel X : LRel X -> Prop :=
 (*=End *)
 
 (*=AFStrengthenLRel *)
-Lemma af_strengthen_lrel (X:Set) (A : LRel X) : 
+Lemma af_strengthen_lrel (X:Type) (A : LRel X) : 
    almost_full_lrel A -> 
    forall (B : LRel X), (forall xs, A xs -> B xs) -> 
    almost_full_lrel B.
@@ -42,11 +42,11 @@ right. apply H1. apply H2.
 Defined.
 
 (*=Arity *)
-Inductive WFT (X:Set) := 
+Inductive WFT (X:Type) := 
   | ZT  : WFT X 
   | SUP : (X -> WFT X) -> WFT X.
    
-Fixpoint Arity (X:Set) (p : WFT X) (A : LRel X) := 
+Fixpoint Arity (X:Type) (p : WFT X) (A : LRel X) := 
   match p with 
   | ZT _    => (forall ys, A ys <-> A nil)
   | SUP w => (forall x, Arity (w x) (fun ys => A (x::ys)))
@@ -54,7 +54,7 @@ Fixpoint Arity (X:Set) (p : WFT X) (A : LRel X) :=
 (*=End *)
 
 (*=AFIntersectLRel *)
-Lemma af_intersection_lrel (X:Set):
+Lemma af_intersection_lrel (X:Type):
    forall (p : WFT X), 
    forall (R : LRel X), almost_full_lrel R -> 
    forall (T : LRel X), almost_full_lrel T -> 
@@ -146,7 +146,7 @@ induction p.
 Defined.
 
 (*=AFIntersectLRelCor *)
-Lemma af_intersection_lrel_cor (X:Set):
+Lemma af_intersection_lrel_cor (X:Type):
    forall (p : WFT X) A B,
    Arity p A -> Arity p B -> 
    almost_full_lrel A -> almost_full_lrel B -> 
@@ -163,7 +163,7 @@ Defined.
 
 (* Let's get the familiar binary relation theorem from the nary *)
 
-Fixpoint take (X : Set) (n : nat) (xs : list X) := 
+Fixpoint take (X : Type) (n : nat) (xs : list X) := 
   match n with 
   | O => nil
   | S n => match xs with 
@@ -173,7 +173,7 @@ Fixpoint take (X : Set) (n : nat) (xs : list X) :=
   end.
 
 (*=BinRelExtension *)
-Definition BinRelExtension (X:Set) (A : X -> X -> Prop) : LRel X := 
+Definition BinRelExtension (X:Type) (A : X -> X -> Prop) : LRel X := 
    fun ys => match ys with 
     | nil => False
     | cons x xs => match xs with 
@@ -184,7 +184,7 @@ Definition BinRelExtension (X:Set) (A : X -> X -> Prop) : LRel X :=
 (*=End *)
 
 (*=Af2AfLrel *)
-Lemma af_to_af_lrel (X:Set) (A : X -> X -> Prop) :
+Lemma af_to_af_lrel (X:Type) (A : X -> X -> Prop) :
   almost_full A -> almost_full_lrel (BinRelExtension A).
 (*=End *)
 intro afA.
@@ -198,7 +198,7 @@ intros. simpl in H1. destruct xs. destruct H1. destruct xs. simpl in H1. destruc
 simpl in H1. destruct H1. left. left. auto. left. right. auto.
 Defined.
 
-Lemma af_lrel_to_af (X:Set) (R : LRel X) : 
+Lemma af_lrel_to_af (X:Type) (R : LRel X) : 
   (forall x y zs, R (x::y::zs) <-> R (x::y::nil)) -> 
   almost_full_lrel R -> almost_full (fun x y => R (x::y::nil)).
 intros.
@@ -222,7 +222,7 @@ destruct (H x x0 (y::nil)). apply H4. apply H3.
 Defined.
 
 (*=AfLrel2Af *)
-Corollary af_lrel_to_af_cor (X:Set) (A : X -> X -> Prop) :
+Corollary af_lrel_to_af_cor (X:Type) (A : X -> X -> Prop) :
    almost_full_lrel (BinRelExtension A) -> almost_full A.
 (*=End *)
 intros. 
@@ -232,7 +232,7 @@ apply H.
 intros. simpl in H0. auto.
 Defined.
 
-Corollary af_intersection_usual (X:Set) (A : X -> X -> Prop) (B : X -> X -> Prop) : 
+Corollary af_intersection_usual (X:Type) (A : X -> X -> Prop) (B : X -> X -> Prop) : 
      almost_full A -> 
      almost_full B -> 
      almost_full (fun x y => A x y /\ B x y).
@@ -250,4 +250,3 @@ destruct xs. simpl. destruct H4. destruct xs. destruct H4.
 simpl. simpl in H5. simpl in H5. auto.
 apply af_lrel_to_af_cor. apply H4.
 Defined.
-

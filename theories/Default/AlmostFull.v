@@ -19,19 +19,19 @@ Set Transparent Obligations.
  ****************************************************************)
 
 (*=Decidable *)
-Definition dec_rel (X:Set) (R:X->X->Prop) := 
+Definition dec_rel (X:Type) (R:X->X->Prop) := 
   forall x y, {not (R y x)} + {R y x}.
 (*=End *)
 
 
 (*=WFT *)
-Inductive WFT (X : Set) : Set := 
+Inductive WFT (X : Type) : Type := 
   | ZT : WFT X
   | SUP : (X -> WFT X) -> WFT X.
 (*=End *)
 
 (*=SecureBy *)
-Fixpoint SecureBy (X:Set) (A : X->X->Prop) 
+Fixpoint SecureBy (X:Type) (A : X->X->Prop) 
                     (p : WFT X) : Prop := 
  match p with 
  | ZT _ => forall x y, A x y
@@ -41,23 +41,23 @@ Fixpoint SecureBy (X:Set) (A : X->X->Prop)
 (*=End *)
 
 (*=AlmostFull *)
-Definition almost_full (X:Set) (A : X->X->Prop) := 
+Definition almost_full (X:Type) (A : X->X->Prop) := 
   exists p, SecureBy A p.
 (*=End *)
 
 Lemma sup_rewrite: 
-   forall (X:Set) (A : X -> X -> Prop) (f : X -> WFT X), 
+   forall (X:Type) (A : X -> X -> Prop) (f : X -> WFT X), 
    SecureBy A (SUP f) = 
    forall x, SecureBy (fun y z => A y z \/ A x y) (f x).
 Proof. intros. auto. Qed.
 
-Lemma sup_eq:  forall (X:Set) (f : X -> WFT X) g, f = g -> SUP f = SUP g.
+Lemma sup_eq:  forall (X:Type) (f : X -> WFT X) g, f = g -> SUP f = SUP g.
 Proof. intros. auto. rewrite H. reflexivity. Qed.
 
 
 (*=SecStrengthen *)
 Lemma sec_strengthen: 
- forall (X:Set) (p : WFT X) (A B : X -> X -> Prop), 
+ forall (X:Type) (p : WFT X) (A B : X -> X -> Prop), 
  (forall x y, A x y -> B x y) -> SecureBy A p -> SecureBy B p.
 (*=End *)
 Proof.
@@ -73,7 +73,7 @@ Qed.
 (* SecureBy implies that every infinite chain has two related elements *) 
 (*=InfiniteChain *)
 Lemma sec_binary_infinite_chain : 
-    forall (X:Set) (p : WFT X) R (f : nat -> X) (k : nat), 
+    forall (X:Type) (p : WFT X) R (f : nat -> X) (k : nat), 
     SecureBy R p -> 
     exists n, exists m, (n > m) /\ (m >= k) /\ R (f m) (f n).
 (*=End *)
@@ -87,7 +87,7 @@ exists x0. exists k. split. auto with arith. split. auto. apply H3.
 Qed.
 
 (*=InfiniteChainCorollary *)
-Corollary af_inf_chain (X : Set) (R : X -> X -> Prop): 
+Corollary af_inf_chain (X : Type) (R : X -> X -> Prop): 
    almost_full R -> 
    forall (f : nat -> X), exists n, exists m, (n > m) /\ R (f m) (f n).
 (*=End *)
@@ -161,7 +161,7 @@ Qed.
 
 (* Generalization to an arbitrary decidable well-founded relation *)
 (*=AfTreeIter *)
-Fixpoint af_tree_iter (X:Set) (R : X -> X -> Prop) 
+Fixpoint af_tree_iter (X:Type) (R : X -> X -> Prop) 
          (decR : dec_rel R) (x:X) (accX : Acc R x) :=
  match accX with 
  | Acc_intro _ f => SUP (fun y => 
@@ -173,7 +173,7 @@ Fixpoint af_tree_iter (X:Set) (R : X -> X -> Prop)
 (*=End *)
 
 (*=AfTree *)
-Definition af_tree (X:Set) (R : X -> X -> Prop) 
+Definition af_tree (X:Type) (R : X -> X -> Prop) 
  (wfR : well_founded R) (decR : dec_rel R) : X -> WFT X.
 (*=End *)
 Proof. intro x. 
@@ -184,7 +184,7 @@ Defined. (* Not Qed because we want to compute with it *)
 
 (*=AfFromWf *)
 Lemma secure_from_wf :
- forall (X:Set) (R : X -> X -> Prop) 
+ forall (X:Type) (R : X -> X -> Prop) 
  (wfR : well_founded R) (decR : dec_rel R),
  SecureBy (fun x y => not (R y x)) 
           (SUP (af_tree wfR decR)).
@@ -207,7 +207,7 @@ right. left. apply H0.
 Defined. (* Not Qed because we want to compute with it *)
 
 (*=AfFromWfCor *)
-Corollary af_from_wf (X:Set) (R : X -> X -> Prop) : 
+Corollary af_from_wf (X:Type) (R : X -> X -> Prop) : 
   well_founded R -> 
   dec_rel R -> almost_full (fun x y => not (R y x)).
 (*=End *)
@@ -249,7 +249,7 @@ Qed.
 
 (*=AccFromAf *)
 Lemma acc_from_af: 
-  forall (X:Set) (p : WFT X) (R : X -> X -> Prop) 
+  forall (X:Type) (p : WFT X) (R : X -> X -> Prop) 
   (T : X -> X -> Prop) y, 
   (forall x z, clos_refl_trans X T z y -> 
                clos_trans_1n X T x z /\ R z x -> False)
@@ -275,7 +275,7 @@ Defined.
 
 (*=WfFromAf *)
 Lemma wf_from_af : 
-   forall (X:Set) (p : WFT X) 
+   forall (X:Type) (p : WFT X) 
    (R : X -> X -> Prop) (T : X -> X -> Prop), 
    (forall x y, clos_trans_1n X T x y /\ R y x -> False) 
     -> SecureBy R p -> well_founded T.
@@ -289,7 +289,7 @@ Defined.
 (* A reassuring lemma *)
 (*=WfFromWqo *)
 Lemma wf_from_wqo : 
-  forall (X:Set) (p : WFT X) (R : X -> X -> Prop), 
+  forall (X:Type) (p : WFT X) (R : X -> X -> Prop), 
          transitive X R -> SecureBy R p -> 
          well_founded (fun x y => R x y /\ not (R y x)).
 (*=End *)

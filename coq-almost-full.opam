@@ -22,6 +22,8 @@ tags: [
   "category:Computer Science/Data Types and Data Structures"
   "keyword:Ramsey theorem"
   "keyword:termination"
+  "keyword:almost-full relations"
+  "keyword:well-founded relations"
   "logpath:AlmostFull"
 ]
 authors: [
