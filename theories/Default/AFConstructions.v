@@ -21,7 +21,7 @@ Set Transparent Obligations.
  ****************************************************************)
 
 (*=SecUnion *)
-Lemma sec_union (X:Set) (A:X->X->Prop) (B:X->X->Prop): 
+Lemma sec_union (X:Type) (A:X->X->Prop) (B:X->X->Prop): 
  forall p, SecureBy A p -> 
    SecureBy (fun x y => A x y \/ B x y) p.
 (*=End *)
@@ -31,7 +31,7 @@ Defined.
 
 (*=AfUnion *)
 Corollary af_union: 
- forall (X:Set) (A:X->X->Prop) (B:X->X->Prop),
+ forall (X:Type) (A:X->X->Prop) (B:X->X->Prop),
  almost_full A -> 
  almost_full (fun x y => A x y \/ B x y).
 (*=End *)
@@ -48,7 +48,7 @@ Defined.
 
 
 (*=OplusNullary *)
-Fixpoint oplus_nullary (X:Set) (p:WFT X) (q:WFT X) := 
+Fixpoint oplus_nullary (X:Type) (p:WFT X) (q:WFT X) := 
   match p with 
   | ZT _ => q
   | SUP f => SUP (fun x => oplus_nullary (f x) q)
@@ -57,7 +57,7 @@ Fixpoint oplus_nullary (X:Set) (p:WFT X) (q:WFT X) :=
 
 (*=OplusLemma *)
 Lemma oplus_nullary_sec_intersection: 
-  forall (X:Set) (p : WFT X) (q: WFT X) 
+  forall (X:Type) (p : WFT X) (q: WFT X) 
   (C : X -> X -> Prop) (A : Prop) (B : Prop),
   SecureBy (fun y z => C y z \/ A) p -> 
   SecureBy (fun y z => C y z \/ B) q -> 
@@ -98,17 +98,17 @@ Defined.
 
 (*=OplusUnary *)
 Definition oplus_unary 
-  (X:Set) (p : WFT X): WFT X -> WFT X.
+  (X:Type) (p : WFT X): WFT X -> WFT X.
 (*=End *)
 induction p. 
   intro q. apply q.
   intro q. induction q. apply (SUP w).
   apply SUP. intro x. apply oplus_nullary. 
-  apply (H x (SUP w0)).
-  apply (H0 x).
+  apply (X0 x (SUP w0)).
+  apply (X1 x).
 Defined.
 
-Lemma oplus_unary_sup_sup : forall (X:Set) (f : X -> WFT X) (g : X -> WFT X),
+Lemma oplus_unary_sup_sup : forall (X:Type) (f : X -> WFT X) (g : X -> WFT X),
      oplus_unary (SUP f) (SUP g) = 
      SUP (fun x => oplus_nullary (oplus_unary (f x) (SUP g))
                                  (oplus_unary (SUP f) (g x))).
@@ -116,7 +116,7 @@ Proof. intros. auto. Defined.
 
 (*=OplusUnaryLemma *)
 Lemma oplus_unary_sec_intersection: 
-  forall (X:Set) (p:WFT X) (q:WFT X) (C : X -> X -> Prop) 
+  forall (X:Type) (p:WFT X) (q:WFT X) (C : X -> X -> Prop) 
   (A : X -> Prop) (B : X -> Prop), 
   SecureBy (fun y z => C y z \/ A y) p -> 
   SecureBy (fun y z => C y z \/ B y) q -> 
@@ -185,27 +185,27 @@ Qed.
 
 (*=OplusBinary *)
 Definition oplus_binary 
-  (X:Set) (p : WFT X) : WFT X -> WFT X. 
+  (X:Type) (p : WFT X) : WFT X -> WFT X. 
 (*=End *)
 induction p. 
   intro q. apply q.
   intro q.
   induction q. apply (SUP w). 
   apply SUP.
-  intro x. apply oplus_unary. apply (H x (SUP w0)).
-  apply (H0 x).
+  intro x. apply oplus_unary. apply (X0 x (SUP w0)).
+  apply (X1 x).
 Defined.
 
 
-Lemma oplus_binary_zt_sup : forall (X:Set) (f : X -> WFT X) q, 
+Lemma oplus_binary_zt_sup : forall (X:Type) (f : X -> WFT X) q, 
      oplus_binary (ZT X) q = q.
 intros. auto. Defined.
-Lemma oplus_binary_sup_zt : forall (X:Set) (f : X -> WFT X) p, 
+Lemma oplus_binary_sup_zt : forall (X:Type) (f : X -> WFT X) p, 
      oplus_binary p (ZT X) = p.
 intros. induction p. auto. auto. Defined.
 
 
-Lemma oplus_binary_sup_sup : forall (X:Set) (f : X -> WFT X) (g : X -> WFT X),
+Lemma oplus_binary_sup_sup : forall (X:Type) (f : X -> WFT X) (g : X -> WFT X),
      oplus_binary (SUP f) (SUP g) = 
      SUP (fun x => oplus_unary  (oplus_binary (f x) (SUP g))
                                 (oplus_binary (SUP f) (g x))).
@@ -213,7 +213,7 @@ Proof. intros. auto. Defined.
 
 (*=OplusBinaryLemma *)
 Lemma oplus_binary_sec_intersection : 
- forall (X:Set) (p : WFT X) (q : WFT X) 
+ forall (X:Type) (p : WFT X) (q : WFT X) 
  (A : X -> X -> Prop) (B : X -> X -> Prop), 
  SecureBy A p -> SecureBy B q -> 
  SecureBy (fun x y => A x y /\ B x y) (oplus_binary p q).
@@ -247,7 +247,7 @@ Focus 1. intros. simpl in H. destruct H. left. auto. right. auto.
 Defined.
 
 (*=AfIntersection *)
-Corollary af_intersection (X:Set) (A B :X->X->Prop):
+Corollary af_intersection (X:Type) (A B :X->X->Prop):
   almost_full A -> almost_full B -> 
   almost_full (fun x y => A x y /\ B x y).
 (*=End *)
@@ -256,7 +256,7 @@ exists (oplus_binary p q). apply oplus_binary_sec_intersection; repeat auto.
 Defined.
 
 (* Some other facts, not used in the rest of the development *) 
-Lemma sec_nullary_right : forall (X : Set) (q : WFT X) (s : WFT X) (R : X -> X -> Prop),
+Lemma sec_nullary_right : forall (X : Type) (q : WFT X) (s : WFT X) (R : X -> X -> Prop),
           SecureBy R s -> SecureBy R (oplus_nullary q s).
 intros X q. induction q.
 intros. simpl. apply H.
@@ -270,7 +270,7 @@ intros. simpl in H2. destruct H2. left. left. apply H2.
 right. left. apply H2.
 Defined.
 
-Lemma sec_nullary_left : forall (X : Set) (q : WFT X) (s : WFT X) (R : X -> X -> Prop),
+Lemma sec_nullary_left : forall (X : Type) (q : WFT X) (s : WFT X) (R : X -> X -> Prop),
           SecureBy R q -> SecureBy R (oplus_nullary q s).
 intros X q. induction q. intros. simpl in H. simpl.
 induction s. simpl. apply H. simpl. intro x. eapply sec_strengthen.
@@ -282,7 +282,7 @@ simpl. intro x. apply H. simpl in H0. apply H0.
 Defined.
 
 
-Lemma sec_unary_left : forall (X : Set) (q : WFT X) (s : WFT X) (R : X -> X -> Prop),
+Lemma sec_unary_left : forall (X : Type) (q : WFT X) (s : WFT X) (R : X -> X -> Prop),
           SecureBy R q -> SecureBy R (oplus_unary q s).
 intros X q. induction q. intros. simpl in H. simpl.
 induction s. simpl. apply H. simpl. intro x. eapply sec_strengthen.
@@ -294,7 +294,7 @@ intro x. apply sec_nullary_left. apply H.
 simpl in H0. apply H0.
 Defined. 
 
-Lemma sec_unary_right : forall (X : Set) (q : WFT X) (s : WFT X) (R : X -> X -> Prop),
+Lemma sec_unary_right : forall (X : Type) (q : WFT X) (s : WFT X) (R : X -> X -> Prop),
           SecureBy R s -> SecureBy R (oplus_unary q s).
 intros X q. induction q.
 intros. simpl. apply H. intros.
@@ -308,7 +308,7 @@ apply H. eapply sec_strengthen. Focus 2. apply H0. Focus 1.
 intros. left. apply H2.
 Defined.
 
-Lemma sec_binary_left : forall (X : Set) (q : WFT X) (s : WFT X) (R : X -> X -> Prop),
+Lemma sec_binary_left : forall (X : Type) (q : WFT X) (s : WFT X) (R : X -> X -> Prop),
           SecureBy R q -> SecureBy R (oplus_binary q s).
 intros X q. induction q. intros. simpl in H. simpl.
 induction s. simpl. apply H. simpl. intro x. eapply sec_strengthen.
@@ -321,7 +321,7 @@ simpl in H0. apply H0.
 Defined.
 
 
-Lemma sec_binary_right : forall (X : Set) (q : WFT X) (s : WFT X) (R : X -> X -> Prop),
+Lemma sec_binary_right : forall (X : Type) (q : WFT X) (s : WFT X) (R : X -> X -> Prop),
           SecureBy R s -> SecureBy R (oplus_binary q s).
 intros X q. induction q.
 intros. simpl. apply H. intros.
@@ -350,7 +350,7 @@ Defined.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*)
 
 (*=Cofmap *)
-Fixpoint cofmap (X:Set) (Y:Set) (f:Y->X) (p:WFT X) :=
+Fixpoint cofmap (X:Type) (Y:Type) (f:Y->X) (p:WFT X) :=
   match p with 
   | ZT _ => ZT Y
   | SUP w => SUP (fun y => cofmap f (w (f y)))
@@ -359,7 +359,7 @@ Fixpoint cofmap (X:Set) (Y:Set) (f:Y->X) (p:WFT X) :=
 
 (*=CofmapLemma *)
 Lemma cofmap_secures: 
-  forall (X Y:Set)(f:Y->X) (p:WFT X) (R:X->X->Prop),
+  forall (X Y:Type)(f:Y->X) (p:WFT X) (R:X->X->Prop),
   SecureBy R p -> 
   SecureBy (fun x y => R (f x) (f y)) (cofmap f p).
 (*=End *)
@@ -372,7 +372,7 @@ remember (H (f x) (fun y z => R y z \/ R (f x) y)).
 simpl in s. apply s. apply H0. Defined.
 
 (*=CoFmapCorollary *)
-Corollary af_cofmap (X Y:Set) (f:Y->X) (R:X->X->Prop):
+Corollary af_cofmap (X Y:Type) (f:Y->X) (R:X->X->Prop):
   almost_full R -> almost_full (fun x y => R (f x) (f y)).
 (*=End *)
 intros (p,Rsec). exists (cofmap f p). apply cofmap_secures; auto.
@@ -384,7 +384,7 @@ Defined.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*)
 
 (*=AfProduct *) 
-Lemma af_product (X : Set) (Y : Set) : 
+Lemma af_product (X : Type) (Y : Type) : 
   forall (A : X -> X -> Prop) (B : Y -> Y -> Prop), 
   almost_full A -> almost_full B -> 
   almost_full (fun x y => A (fst x) (fst y) /\
@@ -396,7 +396,7 @@ Defined.
 (*=End *)
 
 (*=AfProductLeft *)
-Lemma af_product_left (X Y : Set) (A:X->X->Prop) : 
+Lemma af_product_left (X Y : Type) (A:X->X->Prop) : 
   almost_full A -> 
   almost_full (fun (x:X*Y) (y:X*Y) => A (fst x) (fst y)).
 intros afA. 
@@ -432,7 +432,7 @@ exists bool_tree. apply sec_bool. Defined.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*)
  
 (*=SumLift *)
-Definition sum_lift (X Y:Set) 
+Definition sum_lift (X Y:Type) 
   (A:X->X->Prop) (B:Y->Y->Prop) (x:X+Y) (y:X+Y) := 
   match (x,y) with 
   | (inl x0, inl y0) => A x0 y0 
@@ -443,7 +443,7 @@ Definition sum_lift (X Y:Set)
 (*=End *)
 
 (*=LeftSumLift *)
-Definition left_sum_lift (X Y:Set) (A:X->X->Prop) 
+Definition left_sum_lift (X Y:Type) (A:X->X->Prop) 
   (x:X+Y) (y:X+Y) := 
   match (x,y) with 
   | (inl x0, inl y0) => A x0 y0 
@@ -455,7 +455,7 @@ Definition left_sum_lift (X Y:Set) (A:X->X->Prop)
 
 
 (*=LeftSumTree *)
-Fixpoint left_sum_tree (X Y:Set) (p:WFT X) 
+Fixpoint left_sum_tree (X Y:Type) (p:WFT X) 
   : WFT (X+Y) := 
   match p with 
     | ZT _ => SUP (fun x => SUP (fun y => 
@@ -473,7 +473,7 @@ Fixpoint left_sum_tree (X Y:Set) (p:WFT X)
 (*=End *)
 
 (*=SecLeftSumTree *)
-Lemma sec_left_sum_tree (X Y:Set) (p : WFT X): 
+Lemma sec_left_sum_tree (X Y:Type) (p : WFT X): 
   forall (A : X -> X -> Prop), SecureBy A p -> 
   SecureBy (left_sum_lift A) (left_sum_tree Y p).
 (*=End *)
@@ -497,7 +497,7 @@ induction p.
 Defined.
 
 (*=Transpose *)
-Definition transpose (X Y:Set) (x:X+Y) : Y+X := 
+Definition transpose (X Y:Type) (x:X+Y) : Y+X := 
   match x with 
   | inl x0 => inr _ x0 
   | inr x0 => inl _ x0
@@ -505,15 +505,15 @@ Definition transpose (X Y:Set) (x:X+Y) : Y+X :=
 (*=End *)
 
 (*=RightTranspose *)
-Definition right_sum_lift (X Y:Set) 
+Definition right_sum_lift (X Y:Type) 
   (B:Y->Y->Prop) (x y:X+Y) := 
   left_sum_lift B (transpose x) (transpose y).
 
-Definition right_sum_tree (X Y:Set) (p:WFT Y) 
+Definition right_sum_tree (X Y:Type) (p:WFT Y) 
   : WFT (X+Y) :=
   cofmap (@transpose X Y) (@left_sum_tree Y X p).
 
-Lemma sec_right_sum_tree (X Y:Set) (p : WFT Y): 
+Lemma sec_right_sum_tree (X Y:Type) (p : WFT Y): 
   forall (B : Y -> Y -> Prop), SecureBy B p -> 
   SecureBy (right_sum_lift B) (right_sum_tree X p).
 intros. 
@@ -523,7 +523,7 @@ apply sec_left_sum_tree; assumption. Defined.
 (*=End *)
 
 (*=SecSumLift *)
-Lemma sec_sum_lift (X Y : Set) :
+Lemma sec_sum_lift (X Y : Type) :
   forall (A : X -> X -> Prop) (B : Y -> Y -> Prop)
   (p : WFT X) (q : WFT Y), 
   SecureBy A p -> SecureBy B q -> 
@@ -539,7 +539,7 @@ apply oplus_binary_sec_intersection.
 Defined.
 
 (*=AfSumLift *)
-Corollary af_sum_lift (X Y : Set) : 
+Corollary af_sum_lift (X Y : Type) : 
   forall (A : X -> X -> Prop) (B : Y -> Y -> Prop), 
   almost_full A -> almost_full B -> 
   almost_full (sum_lift A B).
@@ -555,7 +555,7 @@ Defined.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*)
 
 (* Finite natural values in the range [0 ... k-1] that is, k inhabitants *)
-Inductive Finite (k:nat) : Set := FinIntro x (_ : x < k).
+Inductive Finite (k:nat) : Type := FinIntro x (_ : x < k).
 
 Definition next_fin k (x : Finite k) (y : Finite k) := 
   match (x,y) with 

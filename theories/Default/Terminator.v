@@ -17,7 +17,7 @@ Set Transparent Obligations.
 
 (*=DisjunctiveWF *)
 Lemma disjunctive_wf : 
-  forall (A:Set) (T : A -> A -> Prop) 
+  forall (A:Type) (T : A -> A -> Prop) 
   (R1 R2 : A -> A -> Prop) 
   (decR1 : dec_rel R1) (decR2 : dec_rel R2), 
   well_founded R1 -> well_founded R2 -> 
@@ -37,17 +37,17 @@ Defined.
 
 (*=TerminatorInduction *)
 Lemma disj_wf_induction:
- forall (A:Set) (T : A -> A -> Prop)
+ forall (A:Type) (T : A -> A -> Prop)
  (R1 R2 : A -> A -> Prop) 
  (decR1 : dec_rel R1) (decR2 : dec_rel R2),
  well_founded R1 -> well_founded R2 -> 
  (forall x y, clos_trans_1n A T x y ->  R1 x y \/ R2 x y) -> 
- forall P : A -> Set, 
+ forall P : A -> Type, 
  (forall x, (forall y, T y x -> P y) -> P x)
  -> forall a, P a.
 (*=End *)
 intros A T R1 R2 decR1 decR2 wfR1 wfR2 Hincl P.
-apply well_founded_induction with (R := T).
+apply well_founded_induction_type with (R := T).
 apply disjunctive_wf with (R1 := R1) (R2 := R2); auto.
 Defined.
 
