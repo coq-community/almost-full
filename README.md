@@ -31,7 +31,6 @@ Theorem, useful for proving termination.
   - Dimitrios Vytiniotis (initial)
   - Thierry Coquand (initial)
   - David Wahlstedt (initial)
-
 - Coq-community maintainer(s):
   - Karl Palmskog ([**@palmskog**](https://github.com/palmskog))
 - License: [MIT License](LICENSE)
