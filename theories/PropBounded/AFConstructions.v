@@ -4,7 +4,6 @@ Require Import Lia.
 Require Import Wellfounded.
 Require Import List.
 Require Import Relations.
-Require Import Logic.
 
 From AlmostFull Require Import PropBounded.AlmostFull.
 
@@ -13,37 +12,34 @@ Unset Strict Implicit.
 Set Printing Implicit Defensive.
 Set Transparent Obligations.
 
-
-(****************************************************************
+(* **************************************************************
  *                                                              * 
  *                           Unions                             * 
  *                                                              * 
  ****************************************************************)
 
-(*=AfUnion *)
+(* AfUnion *)
 Corollary af_union: 
  forall (X:Type) (A B : X -> X -> Prop),
  almost_full A -> almost_full (fun x y => A x y \/ B x y).
-(*=End *)
+Proof.
 intros X A B afA. eapply af_strengthen. apply afA. auto.
 Defined.
 
-
-(****************************************************************
+(* **************************************************************
  *                                                              * 
  *                       Intersections                          * 
  *      (the intuitionistic version of Ramsey's theorem)        *
  *                                                              * 
  ****************************************************************)
 
-(*=OplusNullaryLemma *)
+(* OplusNullaryLemma *)
 Lemma oplus_nullary (X:Type) (A B : Prop) (R : X -> X -> Prop) : 
-  almost_full R ->
-  forall C, 
-  (forall x y, R x y <-> C x y \/ A) ->
-  almost_full (fun (x:X) (y:X) => C x y \/ B) ->
-  almost_full (fun (x:X) (y:X) => C x y \/ A /\ B).
-(*=End *)
+ almost_full R ->
+ forall C, (forall x y, R x y <-> C x y \/ A) ->
+ almost_full (fun (x:X) (y:X) => C x y \/ B) ->
+ almost_full (fun (x:X) (y:X) => C x y \/ A /\ B).
+Proof.
 intro afR. induction afR. intros. eapply af_strengthen. apply H1.
 intros. simpl in H2. destruct H2. left. auto. 
 assert (C x y \/ A). apply H0. apply H. destruct H3. left. auto.
@@ -65,17 +61,17 @@ simpl in H3. destruct H3. destruct H3. right. left. apply H3.
 left. left. apply H3. right. right. apply H3.
 Defined.
 
-(*=OplusNullaryCor *)
+(* OplusNullaryCor *)
 Lemma oplus_nullary_cor (X:Type) (A B : Prop) (C : X -> X -> Prop) : 
   almost_full (fun x y => C x y \/ A) -> 
   almost_full (fun x y => C x y \/ B) -> 
   almost_full (fun x y => C x y \/ (A /\ B)).
-(*=End *)
+Proof.
 intros. apply oplus_nullary with (R := fun x y => C x y \/ A).
 apply H. auto. intros. firstorder. apply H0. 
 Defined.
 
-(*=OplusUnaryLemma *)
+(* OplusUnaryLemma *)
 Lemma oplus_unary (X:Type) (A B : X -> Prop):
   forall R, almost_full R -> 
   forall T, almost_full T -> 
@@ -83,7 +79,7 @@ Lemma oplus_unary (X:Type) (A B : X -> Prop):
   (forall x y, R x y -> C x y \/ A x) -> 
   (forall x y, T x y -> C x y \/ B x) -> 
   almost_full (fun x y => C x y \/ (A x /\ B x)).
-(*=End *)
+Proof.
 intros R afR. induction afR.
   (* ZT *) 
   intros T afT C Req Teq.
@@ -132,102 +128,93 @@ intros R afR. induction afR.
     left. right. auto. right. left. auto. right. right. auto. 
 Defined.
 
-
-(*=OplusUnaryCor *)
+(* OplusUnaryCor *)
 Lemma oplus_unary_cor (X:Type) (A B : X -> Prop) (C : X -> X -> Prop):
-  almost_full(fun x y => C x y \/ A x) ->
-  almost_full(fun x y => C x y \/ B x) -> 
-  almost_full (fun x y => C x y \/ (A x /\ B x)).
-(*=End *)
+ almost_full(fun x y => C x y \/ A x) ->
+ almost_full(fun x y => C x y \/ B x) -> 
+ almost_full (fun x y => C x y \/ (A x /\ B x)).
+Proof.
 intros. apply oplus_unary with (R := fun x y => C x y \/ A x) (T := fun x y => C x y \/ B x).
 apply H. apply H0. intros. apply H1. intros. apply H1.
 Defined.
 
-
-(*=OplusBinaryLemma *)
+(* OplusBinaryLemma *)
 Lemma oplus_binary (X:Type):
   forall A, almost_full A -> 
   forall B, almost_full B -> 
-    @almost_full X (fun x y => A x y /\ B x y).
-(*=End *)
+   @almost_full X (fun x y => A x y /\ B x y).
+Proof.
 intros A afA. induction afA.
-  (* ZT *) 
-  intros B afB. 
-  apply (af_strengthen afB). intros. split. apply H. apply H0.
-  (* SUP *)
-  intros B afB. induction afB.
-    (* ZT *) 
-    assert (almost_full R). apply AF_SUP; apply H. 
-    apply (af_strengthen H2). intros. split. apply H3. apply H1.
-    (* SUP *)
-    apply AF_SUP; intro x0.
-    apply oplus_unary_cor.
-    assert (almost_full R0). apply AF_SUP; apply H1.
-    apply (af_strengthen (H0 x0 R0 H3)).
-    intros. destruct H4. destruct H4. left. auto. right. auto.
-    apply (af_strengthen (H2 x0)).
-    intros. destruct H3. destruct H4. left. auto. right. auto.
+(* ZT *) 
+intros B afB. 
+apply (af_strengthen afB). intros. split. apply H. apply H0.
+(* SUP *)
+intros B afB. induction afB.
+(* ZT *) 
+assert (almost_full R). apply AF_SUP; apply H. 
+apply (af_strengthen H2). intros. split. apply H3. apply H1.
+(* SUP *)
+apply AF_SUP; intro x0.
+apply oplus_unary_cor.
+assert (almost_full R0). apply AF_SUP; apply H1.
+apply (af_strengthen (H0 x0 R0 H3)).
+intros. destruct H4. destruct H4. left. auto. right. auto.
+apply (af_strengthen (H2 x0)).
+intros. destruct H3. destruct H4. left. auto. right. auto.
 Defined.
 
-(*=AfIntersection *)
+(* AfIntersection *)
 Corollary af_intersection (X:Type) (A B :X->X->Prop):
   almost_full A -> almost_full B -> 
   almost_full (fun x y => A x y /\ B x y).
-(*=End *)
+Proof.
 intros. apply oplus_binary. apply H. apply H0. 
 Defined.
 
-(****************************************************************
+(* **************************************************************
  *                                                              * 
  *                  Type-based constructions                    * 
  *                                                              * 
  ****************************************************************)
 
+(* Cofmap *)
 
-
-
-
-(* Cofmap 
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*)
-
-(*=CoFmapLemma *)
+(* CoFmapLemma *)
 Corollary af_cofmap (X Y:Type) (f:Y->X) (R:X->X->Prop):
-  almost_full R -> almost_full (fun x y => R (f x) (f y)).
-(*=End *)
-intro afR. 
+ almost_full R -> almost_full (fun x y => R (f x) (f y)).
+Proof.
+intro afR.
 induction afR. apply AF_ZT. intros. apply H.
 apply AF_SUP. intro y. apply H0.
 Defined.
 
-(* Products  
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*)
+(* Products *)
 
-(*=AfProduct *) 
+(* AfProduct *)
 Lemma af_product (X : Type) (Y : Type) : 
   forall (A : X -> X -> Prop) (B : Y -> Y -> Prop), 
   almost_full A -> almost_full B -> 
   almost_full (fun x y => A (fst x) (fst y) /\ B (snd x) (snd y)).
-(*=End *)
+Proof.
 intros A B afA afB. 
-apply(af_intersection (@af_cofmap _ _ (@fst X Y) A afA) 
-                        (@af_cofmap _ _ (@snd X Y) B afB)).
+apply (af_intersection
+   (@af_cofmap _ _ (@fst X Y) A afA) 
+   (@af_cofmap _ _ (@snd X Y) B afB)).
 Defined.
 
-(*=AfProductLeft *)
+(* AfProductLeft *)
 Lemma af_product_left (X Y : Type) (A:X->X->Prop) : 
-  almost_full A -> 
-  almost_full (fun (x:X*Y) (y:X*Y) => A (fst x) (fst y)).
+ almost_full A -> 
+ almost_full (fun (x:X*Y) (y:X*Y) => A (fst x) (fst y)).
 intros afA. 
 apply (@af_cofmap _ _ (@fst X Y) A afA).
 Defined.
-(*=End *)
 
-(* Booleans 
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*)
+(* Booleans *)
 
-(*=AfBool *)
+(* AfBool *)
 Lemma af_bool : almost_full (@eq bool).
-(*=End *)
+Proof.
 apply AF_SUP. intro x. apply AF_SUP. intro y.
 apply AF_SUP. intro z. apply AF_ZT.
 intros. destruct x. destruct y. firstorder. firstorder.
@@ -235,10 +222,9 @@ destruct z. firstorder. firstorder. destruct y.
 firstorder. destruct z. firstorder. firstorder. firstorder.
 Defined.
 
-(* Sums (through products)
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*)
+(* Sums (through products) *)
  
-(*=SumLift *)
+(* SumLift *)
 Definition sum_lift (X Y:Type) 
   (A:X->X->Prop) (B:Y->Y->Prop) (x:X+Y) (y:X+Y) := 
   match (x,y) with 
@@ -247,9 +233,8 @@ Definition sum_lift (X Y:Type)
   | (inr x0, inl y0) => False 
   | (inr x0, inr y0) => B x0 y0
   end.
-(*=End *)
 
-(*=LeftSumLift *)
+(* LeftSumLift *)
 Definition left_sum_lift (X Y:Type) (A:X->X->Prop) (x y : X+Y) := 
   match (x,y) with 
   | (inl x0, inl y0) => A x0 y0 
@@ -257,7 +242,6 @@ Definition left_sum_lift (X Y:Type) (A:X->X->Prop) (x y : X+Y) :=
   | (inr x0, inl y0) => False 
   | (inr x0, inr y0) => True
   end.
-(*=End *)
 
 (* Fixpoint left_sum_tree (X Y:Type) (p:WFT X)  *)
 (*   : WFT (X+Y) :=  *)
@@ -275,60 +259,58 @@ Definition left_sum_lift (X Y:Type) (A:X->X->Prop) (x y : X+Y) :=
 (*       end) *)
 (*   end. *)
 
-(*=SecLeftSumTree *)
+(* SecLeftSumTree *)
 Lemma af_left_sum (X Y : Type) (A : X -> X -> Prop) : 
   @almost_full X A -> @almost_full (X+Y) (left_sum_lift A).
-(*=End *)
+Proof.
 intro afA.
 induction afA.
-   (* ZT *) 
-   apply AF_SUP; intro x. apply AF_SUP; intro y. apply AF_ZT.
-   intros. 
-     destruct x;  (repeat (auto; firstorder)).  
-     destruct y;  (repeat (auto; firstorder)).
-     destruct x0; (repeat (auto; firstorder)).
-     destruct y;  (repeat (auto; firstorder)).
-     destruct x0; (repeat (auto; firstorder)).
-   (* SUP *)
-   apply AF_SUP; intro x.
-   destruct x.
-   apply (af_strengthen (H0 x)). intros.
-   destruct y;  (repeat (auto; firstorder)).
-   destruct x0; (repeat (auto; firstorder)).
-   apply AF_SUP; intro z.
-   destruct z. 
-       apply (af_strengthen (H0 x)). intros.
-       destruct x0; (repeat (auto; firstorder)).
-       destruct y0; (repeat (auto; firstorder)).
-       apply AF_ZT. intros.
-       destruct x; (repeat (auto; firstorder)).
+(* ZT *) 
+apply AF_SUP; intro x. apply AF_SUP; intro y. apply AF_ZT.
+intros. 
+destruct x;  (repeat (auto; firstorder)).  
+destruct y;  (repeat (auto; firstorder)).
+destruct x0; (repeat (auto; firstorder)).
+destruct y;  (repeat (auto; firstorder)).
+destruct x0; (repeat (auto; firstorder)).
+(* SUP *)
+apply AF_SUP; intro x.
+destruct x.
+apply (af_strengthen (H0 x)). intros.
+destruct y;  (repeat (auto; firstorder)).
+destruct x0; (repeat (auto; firstorder)).
+apply AF_SUP; intro z.
+destruct z. 
+apply (af_strengthen (H0 x)). intros.
+destruct x0; (repeat (auto; firstorder)).
+destruct y0; (repeat (auto; firstorder)).
+apply AF_ZT. intros.
+destruct x; (repeat (auto; firstorder)).
 Defined.
 
-(*=Transpose *)
+(* Transpose *)
 Definition transpose (X Y:Type) (x:X+Y) : Y+X := 
   match x with 
   | inl x0 => inr _ x0 
   | inr x0 => inl _ x0
   end.
-(*=End *)
 
-(*=RightTranspose *)
+(* RightTranspose *)
 Definition right_sum_lift (X Y:Type) (B:Y->Y->Prop) (x y:X+Y) := 
   left_sum_lift B (transpose x) (transpose y).
-(*=End *)
 
-(*=SecRightSumTree *)			      
+(* SecRightSumTree *)
 Lemma af_right_sum (X Y : Type) (B : Y -> Y -> Prop) : 
   @almost_full Y B -> @almost_full (X+Y) (right_sum_lift B).
+Proof.
 intros. unfold right_sum_lift. eapply af_cofmap. apply af_left_sum. apply H.
 Defined.
-(*=End *)
 
-(*=AfSumLift *)
+(* AfSumLift *)
 Corollary af_sum_lift (X Y : Type) : 
   forall (A : X -> X -> Prop) (B : Y -> Y -> Prop), 
   almost_full A -> almost_full B -> almost_full (sum_lift A B).
-(*=End *)
+Proof.
 intros A B afA afB.
 assert (almost_full (fun x y => left_sum_lift A x y /\ right_sum_lift B x y)).
 apply af_intersection. apply af_left_sum. apply afA. apply af_right_sum. apply afB.
@@ -336,9 +318,7 @@ apply (af_strengthen H).
 intros. destruct x; repeat firstorder. destruct y; repeat firstorder.
 Defined.
 
-
-(* Finite naturals 
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*)
+(* Finite naturals *)
 
 (* Finite natural values in the range [0 ... k-1] that is, k inhabitants *)
 Inductive Finite (k:nat) : Type := FinIntro x (_ : x < k).
@@ -361,9 +341,9 @@ Definition lift_pointwise n X (R : X -> X -> Prop) :=
   fun (x : Finite n * X) (y : Finite n * X) => 
   eq_fin (fst x) (fst y) /\ R (snd x) (snd y).
 
-(*=LeqAF *)
+(* LeqAF *)
 Lemma leq_af : almost_full le.
-(*=End *)
+Proof.
 assert (almost_full (fun x y => not (y < x))).
 apply af_from_wf. apply lt_wf. unfold dec_rel.
 intros. destruct (le_lt_dec x y). left; lia. right; assumption.
@@ -371,6 +351,7 @@ apply (af_strengthen H). intros. lia.
 Defined.
 
 Lemma af_finite (k:nat) : almost_full (@eq_fin k).
+Proof.
 set (f1 (x:Finite k) := match x with 
                         | @FinIntro _ kx _ => kx
                         end).

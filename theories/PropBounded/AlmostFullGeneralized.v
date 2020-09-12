@@ -3,9 +3,6 @@ Require Import Arith.
 Require Import Wellfounded.
 Require Import List.
 Require Import Relations.
-Require Import Logic.
-
-Require Import List.
 
 From AlmostFull Require Import PropBounded.AlmostFull.
 
@@ -14,25 +11,23 @@ Unset Strict Implicit.
 Set Printing Implicit Defensive.
 Set Transparent Obligations.
 
-(*=LRel *)
+(* LRel *)
 Definition LRel (X:Type) := list X -> Prop.
-(*=End *)
 
-(*=AFLRel *)
+(* AFLRel *)
 Inductive almost_full_lrel X : LRel X -> Prop := 
  | AF_ZT  : forall (R : LRel X), 
     (forall xs, R xs) -> @almost_full_lrel X R
  | AF_SUP : forall (R : LRel X), 
     (forall x, @almost_full_lrel X (fun ys => R ys \/ R (x :: ys))) ->
     @almost_full_lrel X R.
-(*=End *)
 
-(*=AFStrengthenLRel *)
+(* AFStrengthenLRel *)
 Lemma af_strengthen_lrel (X:Type) (A : LRel X) : 
    almost_full_lrel A -> 
    forall (B : LRel X), (forall xs, A xs -> B xs) -> 
    almost_full_lrel B.
-(*=End *)
+Proof.
 intro afA.
 induction afA.
 intros. apply AF_ZT. intros. apply H0. apply H.
@@ -41,7 +36,7 @@ intros. apply H0 with (x := x). intros. destruct H2. left. apply H1. apply H2.
 right. apply H1. apply H2.
 Defined.
 
-(*=Arity *)
+(* Arity *)
 Inductive WFT (X:Type) := 
   | ZT  : WFT X 
   | SUP : (X -> WFT X) -> WFT X.
@@ -50,10 +45,9 @@ Fixpoint Arity (X:Type) (p : WFT X) (A : LRel X) :=
   match p with 
   | ZT _    => (forall ys, A ys <-> A nil)
   | SUP w => (forall x, Arity (w x) (fun ys => A (x::ys)))
-    end. 
-(*=End *)
+    end.
 
-(*=AFIntersectLRel *)
+(* AFIntersectLRel *)
 Lemma af_intersection_lrel (X:Type):
    forall (p : WFT X), 
    forall (R : LRel X), almost_full_lrel R -> 
@@ -63,7 +57,7 @@ Lemma af_intersection_lrel (X:Type):
       (forall xs, R xs -> C xs \/ A xs) -> 
       (forall xs, T xs -> C xs \/ B xs) -> 
       almost_full_lrel (fun xs => C xs \/ A xs /\ B xs).
-(*=End *)
+Proof.
 intro p.
 induction p.
    (* Case Arity = 0 *)
@@ -145,13 +139,13 @@ induction p.
      auto. auto.
 Defined.
 
-(*=AFIntersectLRelCor *)
+(* AFIntersectLRelCor *)
 Lemma af_intersection_lrel_cor (X:Type):
    forall (p : WFT X) A B,
    Arity p A -> Arity p B -> 
    almost_full_lrel A -> almost_full_lrel B -> 
    almost_full_lrel (fun xs => A xs /\ B xs).
-(*=End *)
+Proof.
 intros.
 pose (C := fun (ys : list X) => False).
 assert (almost_full_lrel (fun xs => C xs \/ (A xs /\ B xs))).
@@ -172,7 +166,7 @@ Fixpoint take (X : Type) (n : nat) (xs : list X) :=
            end
   end.
 
-(*=BinRelExtension *)
+(* BinRelExtension *)
 Definition BinRelExtension (X:Type) (A : X -> X -> Prop) : LRel X := 
    fun ys => match ys with 
     | nil => False
@@ -181,12 +175,11 @@ Definition BinRelExtension (X:Type) (A : X -> X -> Prop) : LRel X :=
         | cons z zs => A x z
         end
     end.
-(*=End *)
 
-(*=Af2AfLrel *)
+(* Af2AfLrel *)
 Lemma af_to_af_lrel (X:Type) (A : X -> X -> Prop) :
   almost_full A -> almost_full_lrel (BinRelExtension A).
-(*=End *)
+Proof.
 intro afA.
 induction afA.
 apply AF_SUP. intros. apply AF_SUP. intro z.
@@ -199,8 +192,9 @@ simpl in H1. destruct H1. left. left. auto. left. right. auto.
 Defined.
 
 Lemma af_lrel_to_af (X:Type) (R : LRel X) : 
-  (forall x y zs, R (x::y::zs) <-> R (x::y::nil)) -> 
-  almost_full_lrel R -> almost_full (fun x y => R (x::y::nil)).
+ (forall x y zs, R (x :: y :: zs) <-> R (x :: y :: nil)) -> 
+ almost_full_lrel R -> almost_full (fun x y => R (x :: y :: nil)).
+Proof.
 intros.
 induction H0.
 intros. apply AlmostFull.AF_ZT. intros. apply H0.
@@ -221,10 +215,10 @@ destruct H3. left. auto. right.
 destruct (H x x0 (y::nil)). apply H4. apply H3.
 Defined.
 
-(*=AfLrel2Af *)
+(* AfLrel2Af *)
 Corollary af_lrel_to_af_cor (X:Type) (A : X -> X -> Prop) :
    almost_full_lrel (BinRelExtension A) -> almost_full A.
-(*=End *)
+Proof.
 intros. 
 apply af_strengthen with (A := fun x y => BinRelExtension A (x::y::nil)).
 apply af_lrel_to_af. intros. simpl. auto. split. intros. auto. intros. auto.
@@ -233,9 +227,10 @@ intros. simpl in H0. auto.
 Defined.
 
 Corollary af_intersection_usual (X:Type) (A : X -> X -> Prop) (B : X -> X -> Prop) : 
-     almost_full A -> 
-     almost_full B -> 
-     almost_full (fun x y => A x y /\ B x y).
+ almost_full A -> 
+ almost_full B -> 
+ almost_full (fun x y => A x y /\ B x y).
+Proof.
 intros.
 assert (almost_full_lrel (BinRelExtension A)).
 apply af_to_af_lrel. apply H.

@@ -4,7 +4,6 @@ Require Import Lia.
 Require Import Wellfounded.
 Require Import List.
 Require Import Relations.
-Require Import Logic.
 
 From AlmostFull Require Import PropBounded.AlmostFull.
 From AlmostFull Require Import PropBounded.AFConstructions.
@@ -14,32 +13,30 @@ Unset Strict Implicit.
 Set Printing Implicit Defensive.
 Set Transparent Obligations.
 
-
-(****************************************************************
+(* **************************************************************
  *                                                              * 
  *  af_induction principle                                      *
  *                                                              * 
  ****************************************************************)
 
-
-
-(*=AfInduction *)
-Theorem af_induction:
-   forall (A:Type) (T : A -> A -> Prop) (R : A -> A -> Prop), 
-   almost_full R -> 
-   (forall x y, clos_trans_1n A T x y /\ R y x -> False) -> 
-   forall P : A -> Type, 
-         (forall x, (forall y, T y x -> P y) -> P x)
-          -> forall a, P a.
-(*=End *)
+(* AfInduction *)
+Theorem af_induction: forall (A:Type) (T : A -> A -> Prop) (R : A -> A -> Prop), 
+ almost_full R -> 
+ (forall x y, clos_trans_1n A T x y /\ R y x -> False) -> 
+ forall P : A -> Type, 
+  (forall x, (forall y, T y x -> P y) -> P x) ->
+  forall a, P a.
+Proof.
 intros A T R AF Disj P g.
 apply well_founded_induction_type with (R :=T).
 apply wf_from_af with (R := R). apply Disj. apply AF.
-apply g. Defined.
+apply g.
+Defined.
 
 (* A very simple test that the fixpoint combinator /indeed/ gives us a fixpoint *)
-(*=Fibonacci *)
+(* Fibonacci *)
 Definition fib : nat -> nat.
+Proof.
 apply af_induction with (T := lt) (R := le).
 (* (i) Prove <= is AF *)
 apply leq_af.
@@ -54,8 +51,6 @@ refine (fun x =>
   end); firstorder.
 Defined.
 
-(*=End *)
-
 Eval compute in (fib 0). (* 1 *) 
 Eval compute in (fib 1). (* 1 *)
 Eval compute in (fib 2). (* 2 *)
@@ -63,14 +58,11 @@ Eval compute in (fib 3). (* 3 *)
 Eval compute in (fib 4). (* 5 *)
 Eval compute in (fib 5). (* 8 *)
 
-
-
-(****************************************************************
+(* **************************************************************
  *                                                              * 
  * A principle more akin to size-change-termination             *
  *                                                              * 
  ****************************************************************)
-
 
 (* Power of a relation *) 
 Fixpoint power n X (R : X -> X -> Prop) (x y:X) :=
@@ -92,30 +84,35 @@ Fixpoint plus_mod_aux k n (x:nat) :=
 (* Interesting lemmas about addition modulo k *) 
 Lemma plus_mod_aux_fin k n (x:nat):
   (x < k) -> plus_mod_aux k n x < k.
+Proof.
 generalize dependent k. generalize dependent x.
 induction n. auto. intros. simpl. destruct k. lia.
 simpl. destruct (eq_nat_dec (S k) (S x)). auto. inversion e.
 rewrite minus_diag.  apply IHn. auto. lia.
 assert (k - x <> O). lia. set (k - x) as diff.
 fold diff in H0. destruct diff. firstorder.
-apply IHn. lia. Defined.
-
+apply IHn. lia.
+Defined.
 
 Lemma plus_mod k (n:nat) (x:Finite k) : Finite k.
+Proof.
 inversion x.
 refine (@FinIntro k (plus_mod_aux k n x0) _). apply plus_mod_aux_fin. apply H.
 Defined.
 
 Lemma plus_mod_lt (m:nat): 
   forall k n, m+n < k -> plus_mod_aux k m n = (m+n)%nat.
+Proof.
 induction m. firstorder. intros. simpl. 
 remember (k - S n) as j. 
 destruct j. lia.
 assert (S (m + n) = (m + (S n))%nat). Focus 2. rewrite H0. apply IHm. lia.
-lia. Defined.
+lia.
+Defined.
 
 Lemma plus_mod_gt (m:nat): 
-   forall k x, k > 0 -> m < k -> x < k -> k <= m+x -> plus_mod_aux k m x = m + x - k.
+ forall k x, k > 0 -> m < k -> x < k -> k <= m+x -> plus_mod_aux k m x = m + x - k.
+Proof.
 induction m.
 intros; lia.
 intros. 
@@ -131,7 +128,8 @@ rewrite H3. lia.
 Defined.
 
 Lemma plus_mod_diff: 
-   forall m k x, k > 1 -> m > 0 -> x < k -> m < k -> x <> plus_mod_aux k m x.
+ forall m k x, k > 1 -> m > 0 -> x < k -> m < k -> x <> plus_mod_aux k m x.
+Proof.
 intros.
 destruct (le_lt_dec k (m+x)).
 assert (plus_mod_aux k m x = m + x - k). 
@@ -143,7 +141,8 @@ Defined.
 
 Lemma plus_mod_wraparound (m:nat):
  forall x n, x < m -> n > 0 -> 
-     plus_mod_aux (n + m) m (n + x) = x.
+  plus_mod_aux (n + m) m (n + x) = x.
+Proof.
 induction m. intros; lia. intros. simpl.
 remember (n + S m - (S (n + x))) as diff.
 destruct diff. 
@@ -157,24 +156,24 @@ assert (S (n+x) = (S n + x)%nat). lia. rewrite H3. apply H1.
 Defined.
 
 Lemma plus_mod_suc m: 
- forall x, x < m -> 
-     plus_mod_aux (S m) m (S x) = x.
+ forall x, x < m -> plus_mod_aux (S m) m (S x) = x.
+Proof.
 intros. assert (S m = (1 + m)%nat). firstorder. rewrite H0. 
 assert (S x = (1 + x)%nat). firstorder. rewrite H1. apply plus_mod_wraparound. firstorder.
 firstorder.
 Defined.
 
-
 Lemma ctr_from_ct X (T : X -> X -> Prop): 
- forall x y, 
- clos_trans_1n X T x y -> clos_refl_trans X T x y.
+ forall x y, clos_trans_1n X T x y -> clos_refl_trans X T x y.
+Proof.
 intros x y CT. induction CT. constructor 1. apply H.
-econstructor 3. constructor 1. apply H. apply IHCT. Defined.
+econstructor 3. constructor 1. apply H. apply IHCT.
+Defined.
 
 Lemma ct_from_ctr X (T : X -> X -> Prop): 
-  forall x y z, 
-  clos_trans X T x y -> 
+ forall x y z, clos_trans X T x y -> 
   clos_refl_trans X T y z -> clos_trans_1n X T x z.
+Proof.
 intros x y z Txy CTR.
 induction CTR. apply clos_trans_t1n. apply clos_tn1_trans. 
 econstructor 2. apply H. apply clos_trans_tn1. apply Txy. 
@@ -188,7 +187,9 @@ Lemma diag_pow_decomp k X T:
  clos_trans_1n _ (@lift_diag k X T) x y -> 
     exists m, m < k /\ (eq_fin (fst y) (@plus_mod k m (fst x))) /\ 
       ((m = O /\ clos_trans_1n _ (power k T) (snd x) (snd y)) \/
-      ((m > 0 /\ exists z: Finite k * X, power m T (snd x) (snd z) /\ clos_refl_trans _ (power k T) (snd z) (snd y)))).
+       ((m > 0 /\ exists z: Finite k * X, power m T (snd x) (snd z) /\
+        clos_refl_trans _ (power k T) (snd z) (snd y)))).
+Proof.
 intros x y kGt. 
 intro CT.
 induction CT. 
@@ -266,6 +267,7 @@ Lemma diag_pow_decomp_mod k X T:
  clos_trans_1n _ (@lift_diag k X T) x y -> 
     clos_trans_1n X (power k T) (snd x) (snd y) /\ eq_fin (fst x) (fst y) \/ 
     not (eq_fin (fst x) (fst y)).
+Proof.
 intros x y kGt CT. 
 destruct (diag_pow_decomp kGt CT) as (m,H).
 destruct H. destruct H0. destruct H1.
@@ -277,14 +279,13 @@ apply plus_mod_diff. firstorder. firstorder. firstorder. apply H.
 Defined.
 
 Lemma af_power_induction_non_trivial: 
-  forall (A:Type) k
-  (T : A -> A -> Prop) 
-  (R : A -> A -> Prop), 
+ forall (A:Type) k (T : A -> A -> Prop) (R : A -> A -> Prop),
   k > 1 -> almost_full R -> 
  (forall x y, @clos_trans_1n _ (power k T) x y /\ R y x -> False) -> 
  forall P : A -> Type, 
  (forall x, (forall y, T y x -> P y) -> P x) -> 
  forall x, P x.
+Proof.
 intros X k T R kGt afR Hct P frec.
 assert (forall (x: Finite k * X), P (snd x)).
 apply af_induction with (T := @lift_diag k X T) (R := @lift_pointwise k X R).
@@ -329,18 +330,14 @@ destruct kx.
 intros. apply frec. intros. apply (X0 (@FinIntro k 1 kGt, y)).
 Defined.
 
-
-(*=AfPowerInduction *)
-Lemma af_power_induction: 
-  forall (A:Type) k
-  (T : A -> A -> Prop) (R : A -> A -> Prop), 
-  k >= 1 -> almost_full R -> 
-  (forall x y,
-    clos_trans_1n A (power k T) x y /\ R y x -> False) -> 
+(* AfPowerInduction *)
+Lemma af_power_induction: forall (A:Type) k (T : A -> A -> Prop) (R : A -> A -> Prop), 
+  k >= 1 -> almost_full R ->
+  (forall x y, clos_trans_1n A (power k T) x y /\ R y x -> False) ->
   forall P : A -> Type, 
   (forall x, (forall y, T y x -> P y) -> P x) -> 
   forall x, P x.
-(*=End *)
+Proof.
 intros.
 destruct (le_lt_dec k 1). assert (k = 1). lia. 
 apply af_induction with (T := T) (R := R). apply H0. 
@@ -353,42 +350,42 @@ apply af_power_induction_non_trivial with (k := k) (T := T) (R := R).
 lia. assumption. assumption. assumption.
 Defined.
 
-
-
-(****************************************************************
+(* **************************************************************
  *                                                              * 
  * A particular mutual induction principle                      *
  *                                                              * 
  ****************************************************************)
 
 Definition lift_rel_union (A:Type) (B:Type) 
-                          (TA : A -> A -> Prop) (TB : B -> B -> Prop)
-                          (SA : A -> B -> Prop) (SB : B -> A -> Prop) 
-                          (x : A + B) 
-                          (y : A + B) : Prop.
+ (TA : A -> A -> Prop) (TB : B -> B -> Prop)
+ (SA : A -> B -> Prop) (SB : B -> A -> Prop) 
+ (x : A + B) 
+ (y : A + B) : Prop.
+Proof.
 destruct x as [xl|xr]. 
 destruct y as [yl|yr]. apply (TA xl yl). apply (SA xl yr).
 destruct y as [yl|yr]. apply (SB xr yl). apply (TB xr yr).
-Defined. 
+Defined.
 
-(*=AfInduction *)
+(* AfInduction *)
 
 Lemma af_mut_induction_aux:
    forall (A:Type) (B:Type) 
-          (TA : A -> A -> Prop) (SA : A -> B -> Prop) 
-          (TB : B -> B -> Prop) (SB : B -> A -> Prop)
-          (R : A + B -> A + B -> Prop),
-          almost_full R -> 
-          (forall x y, @clos_trans_1n (A+B) (@lift_rel_union _ _ TA TB SA SB) x y /\ R y x -> False) -> 
-          forall (P : A -> Type) (Q : B -> Type),
-             (forall x : A, (forall y, TA y x -> P y) ->
-                            (forall y, SB y x -> Q y) -> P x) -> 
-             (forall x : B, (forall y, TB y x -> Q y) -> 
-                            (forall y, SA y x -> P y) -> Q x) ->  
-          forall a: A+B, match a with 
-                         | inl l => P l
-                         | inr r => Q r
-                         end.
+     (TA : A -> A -> Prop) (SA : A -> B -> Prop) 
+     (TB : B -> B -> Prop) (SB : B -> A -> Prop)
+     (R : A + B -> A + B -> Prop),
+     almost_full R -> 
+     (forall x y, @clos_trans_1n (A+B) (@lift_rel_union _ _ TA TB SA SB) x y /\ R y x -> False) -> 
+     forall (P : A -> Type) (Q : B -> Type),
+       (forall x : A, (forall y, TA y x -> P y) ->
+                 (forall y, SB y x -> Q y) -> P x) -> 
+       (forall x : B, (forall y, TB y x -> Q y) -> 
+                 (forall y, SA y x -> P y) -> Q x) ->  
+       forall a: A+B, match a with 
+                 | inl l => P l
+                 | inr r => Q r
+                 end.
+Proof.
 intros A B TA SA TB SB R Raf HTrans P Q fA fB.
 apply af_induction with (R := R) (T := @lift_rel_union _ _ TA TB SA SB).
 apply Raf. intros. eapply HTrans. apply H. intros.
@@ -398,19 +395,19 @@ apply fB. intros. remember (X (inr _ y)). simpl in y0. apply y0. apply H.
 intros. remember (X (inl _ y)). simpl in y0. apply y0. apply H. 
 Defined.
 
-Lemma af_mut_induction:
-   forall (A:Type) (B:Type) 
-          (TA : A -> A -> Prop) (SA : A -> B -> Prop) 
-          (TB : B -> B -> Prop) (SB : B -> A -> Prop)
-          (R : A + B -> A + B -> Prop),
-          almost_full R -> 
-          (forall x y, @clos_trans_1n (A+B) (@lift_rel_union _ _ TA TB SA SB) x y /\ R y x -> False) -> 
-          forall (P : A -> Type) (Q : B -> Type),
-             (forall x : A, (forall y, TA y x -> P y) ->
-                            (forall y, SB y x -> Q y) -> P x) -> 
-             (forall x : B, (forall y, TB y x -> Q y) -> 
-                            (forall y, SA y x -> P y) -> Q x) ->  
-          (forall a, P a) * (forall b, Q b).
+Lemma af_mut_induction: forall (A:Type) (B:Type) 
+ (TA : A -> A -> Prop) (SA : A -> B -> Prop) 
+ (TB : B -> B -> Prop) (SB : B -> A -> Prop)
+ (R : A + B -> A + B -> Prop),
+ almost_full R -> 
+ (forall x y, @clos_trans_1n (A+B) (@lift_rel_union _ _ TA TB SA SB) x y /\ R y x -> False) -> 
+ forall (P : A -> Type) (Q : B -> Type),
+    (forall x : A, (forall y, TA y x -> P y) ->
+                   (forall y, SB y x -> Q y) -> P x) -> 
+    (forall x : B, (forall y, TB y x -> Q y) -> 
+                   (forall y, SA y x -> P y) -> Q x) ->  
+ (forall a, P a) * (forall b, Q b).
+Proof.
 intros. 
 assert (forall a:A+B, match a with 
                       | inl l => P l 

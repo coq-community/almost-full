@@ -4,62 +4,58 @@ Require Import Lia.
 Require Import Wellfounded.
 Require Import List.
 Require Import Relations.
-Require Import Logic.
+Require Import FunctionalExtensionality.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
 Set Printing Implicit Defensive.
 Set Transparent Obligations.
 
-
 (* **************************************************************
  *                                                              * 
- *  Basic setup, inductive trees, and almost-full relations      * 
+ *  Basic setup, inductive trees, and almost-full relations     * 
  *                                                              * 
  ****************************************************************)
 
-(*=Decidable *)
+(* Decidable *)
 Definition dec_rel (X:Type) (R:X->X->Prop) := 
   forall x y, {not (R y x)} + {R y x}.
-(*=End *)
 
-
-(*=WFT *)
+(* WFT *)
 Inductive WFT (X : Type) : Type := 
   | ZT : WFT X
   | SUP : (X -> WFT X) -> WFT X.
-(*=End *)
 
-(*=SecureBy *)
-Fixpoint SecureBy (X:Type) (A : X->X->Prop) 
-                    (p : WFT X) : Prop := 
+(* SecureBy *)
+Fixpoint SecureBy (X:Type) (A : X->X->Prop) (p : WFT X) : Prop := 
  match p with 
  | ZT _ => forall x y, A x y
  | SUP p => 
      forall x, SecureBy (fun y z => A y z \/ A x y) (p x)
  end.
-(*=End *)
 
-(*=AlmostFull *)
+(* AlmostFull *)
 Definition almost_full (X:Type) (A : X->X->Prop) := 
   exists p, SecureBy A p.
-(*=End *)
 
 Lemma sup_rewrite: 
    forall (X:Type) (A : X -> X -> Prop) (f : X -> WFT X), 
    SecureBy A (SUP f) = 
    forall x, SecureBy (fun y z => A y z \/ A x y) (f x).
-Proof. intros. auto. Qed.
+Proof. intros; auto. Qed.
 
-Lemma sup_eq:  forall (X:Type) (f : X -> WFT X) g, f = g -> SUP f = SUP g.
-Proof. intros. auto. rewrite H. reflexivity. Qed.
+Lemma sup_eq : forall (X:Type) (f : X -> WFT X) g, f = g -> SUP f = SUP g.
+Proof.
+intros.
+auto.
+rewrite H.
+reflexivity.
+Qed.
 
-
-(*=SecStrengthen *)
+(* SecStrengthen *)
 Lemma sec_strengthen: 
  forall (X:Type) (p : WFT X) (A B : X -> X -> Prop), 
  (forall x y, A x y -> B x y) -> SecureBy A p -> SecureBy B p.
-(*=End *)
 Proof.
 intros X p. induction p.
 intros A B H H0. simpl in H0. simpl. auto.
@@ -69,14 +65,12 @@ intros. simpl in H2. destruct H2. left. apply H0. apply H2. right.
 apply H0. apply H2.
 Qed.
 
-
 (* SecureBy implies that every infinite chain has two related elements *) 
-(*=InfiniteChain *)
+(* InfiniteChain *)
 Lemma sec_binary_infinite_chain : 
-    forall (X:Type) (p : WFT X) R (f : nat -> X) (k : nat), 
-    SecureBy R p -> 
-    exists n, exists m, (n > m) /\ (m >= k) /\ R (f m) (f n).
-(*=End *)
+ forall (X:Type) (p : WFT X) R (f : nat -> X) (k : nat), 
+ SecureBy R p -> 
+ exists n, exists m, (n > m) /\ (m >= k) /\ R (f m) (f n).
 Proof.
 intro X. intro p. induction p. 
 intros. simpl in H. exists (S k). exists k. split. auto. split. auto. apply H.
@@ -86,15 +80,14 @@ exists x. exists x0. split. apply H1. split. auto. auto with arith. apply H3.
 exists x0. exists k. split. auto with arith. split. auto. apply H3.
 Qed.
 
-(*=InfiniteChainCorollary *)
+(* InfiniteChainCorollary *)
 Corollary af_inf_chain (X : Type) (R : X -> X -> Prop): 
-   almost_full R -> 
-   forall (f : nat -> X), exists n, exists m, (n > m) /\ R (f m) (f n).
-(*=End *)
+ almost_full R ->
+ forall (f : nat -> X), exists n, exists m, (n > m) /\ R (f m) (f n).
+Proof.
 intros. destruct H as (p,Hsec).
 destruct (@sec_binary_infinite_chain X p R f 0 Hsec); firstorder.
 Defined.
-
 
 (****************************************************************
  *                                                              * 
@@ -102,7 +95,6 @@ Defined.
  *                                                              * 
  ****************************************************************)
 
-(* 
 (* Specific example: <= is AlmostFull *)
 Fixpoint ltree_aux m (x:nat) : WFT nat :=
   match m with 
@@ -115,36 +107,38 @@ Definition le_tree x := ltree_aux (S x) x.
 
 Lemma aux_le_tree_aux : 
   forall n m y, n > y -> m > y -> ltree_aux n y = ltree_aux m y.
+Proof.
 intro n. induction n. intros. inversion H.
 intro m. induction m. intros. inversion H0.
 intros. simpl. apply sup_eq. apply functional_extensionality. 
-intro z. destruct (le_lt_dec y z). auto. apply IHn. 
-auto with arith. firstorder. firstorder.
+intro z. destruct (le_lt_dec y z). auto. apply IHn.
+lia. lia.
 Qed.
 
 Lemma le_tree_rewrite_aux : 
   forall n x, n > x -> ltree_aux n x = le_tree x.
+Proof.
 intro n. induction n. intros. inversion H.
 intros. destruct (gt_S _ _ H). simpl. 
 unfold le_tree. simpl. apply sup_eq. 
 apply functional_extensionality. intro y. 
 destruct (le_lt_dec x y). auto. 
-apply aux_le_tree_aux. firstorder. firstorder. 
+apply aux_le_tree_aux. lia. lia.
 rewrite H0. unfold le_tree. reflexivity. 
 Qed.
 
 Lemma le_tree_rewrite : forall (x:nat),
-        le_tree x = 
-        SUP (fun y => if le_lt_dec x y then ZT nat else le_tree y).
+ le_tree x = SUP (fun y => if le_lt_dec x y then ZT nat else le_tree y).
+Proof.
 intro x. rewrite <- (@le_tree_rewrite_aux (S x) x).
 simpl. apply sup_eq. apply functional_extensionality. intro y.
 destruct (le_lt_dec x y). auto. apply le_tree_rewrite_aux. firstorder.
 firstorder.
 Qed.
 
-(*=LeTreeLemma *)
+(* LeTreeLemma *)
 Lemma af_le : SecureBy (fun x y => x <= y) (SUP le_tree).
-(*=End *)
+Proof.
 rewrite sup_rewrite. 
 apply (@well_founded_induction nat lt).
 apply lt_wf.
@@ -157,10 +151,8 @@ left. left. apply H0. right. left. apply H0.
 Focus 1. firstorder.
 Qed.
 
-*)
-
 (* Generalization to an arbitrary decidable well-founded relation *)
-(*=AfTreeIter *)
+(* AfTreeIter *)
 Fixpoint af_tree_iter (X:Type) (R : X -> X -> Prop) 
          (decR : dec_rel R) (x:X) (accX : Acc R x) :=
  match accX with 
@@ -170,25 +162,22 @@ Fixpoint af_tree_iter (X:Type) (R : X -> X -> Prop)
        | right Ry => af_tree_iter decR (f y Ry) 
      end)
  end.
-(*=End *)
 
-(*=AfTree *)
+(* AfTree *)
 Definition af_tree (X:Type) (R : X -> X -> Prop) 
  (wfR : well_founded R) (decR : dec_rel R) : X -> WFT X.
-(*=End *)
-Proof. intro x. 
+Proof.
+intro x. 
 apply af_tree_iter with (R := R) (x := x). 
 apply decR. apply wfR. 
 Defined. (* Not Qed because we want to compute with it *)
 
-
-(*=AfFromWf *)
+(* AfFromWf *)
 Lemma secure_from_wf :
  forall (X:Type) (R : X -> X -> Prop) 
  (wfR : well_founded R) (decR : dec_rel R),
  SecureBy (fun x y => not (R y x)) 
           (SUP (af_tree wfR decR)).
-(*=End *)
 Proof.
 intros. rewrite sup_rewrite.
 unfold af_tree. 
@@ -206,18 +195,20 @@ intros. simpl in H0. destruct H0. left. left. apply H0.
 right. left. apply H0.
 Defined. (* Not Qed because we want to compute with it *)
 
-(*=AfFromWfCor *)
+(* AfFromWfCor *)
 Corollary af_from_wf (X:Type) (R : X -> X -> Prop) : 
   well_founded R -> 
   dec_rel R -> almost_full (fun x y => not (R y x)).
-(*=End *)
-intros wfR decR. unfold almost_full. exists (SUP (af_tree wfR decR)).
-apply secure_from_wf. Defined.
+Proof.
+intros wfR decR. unfold almost_full.
+exists (SUP (af_tree wfR decR)).
+apply secure_from_wf.
+Defined.
 
 (* Example: <= is AF *) 
-(*=LeqAF *)
+(* LeqAF *)
 Corollary leq_af : almost_full le.
-(*=End *)
+Proof.
 unfold almost_full.
 cut (dec_rel lt). intro decLt.
 eexists (SUP (af_tree lt_wf decLt)).
@@ -228,8 +219,7 @@ left; lia.
 right; lia.
 Defined.
 
-
-(****************************************************************
+(* **************************************************************
  *                                                              * 
  *  From an AlmostFull relation to a Well-Founded one           *
  *                                                              * 
@@ -247,14 +237,14 @@ remember (@clos_rt_rt1n _ T z0 z Hrt) as F. clear HeqF. clear Hrt.
 induction F. apply G. econstructor 2. apply H. apply IHF. apply G.
 Qed.
 
-(*=AccFromAf *)
+(* AccFromAf *)
 Lemma acc_from_af: 
   forall (X:Type) (p : WFT X) (R : X -> X -> Prop) 
   (T : X -> X -> Prop) y, 
   (forall x z, clos_refl_trans X T z y -> 
-               clos_trans_1n X T x z /\ R z x -> False)
-  -> SecureBy R p -> Acc T y.
-(*=End *)
+               clos_trans_1n X T x z /\ R z x -> False) ->
+  SecureBy R p -> Acc T y.
+Proof.
 intros X p. induction p.
 intros. simpl in H0. 
 apply Acc_intro. intros. edestruct (H y0 y). 
@@ -272,14 +262,12 @@ destruct (H0 z0 y). apply rt_refl. split. Focus 2. apply H4.
 Focus 1. eapply trans_clos_left_aux. apply HT. apply H2.
 Defined.
 
-
-(*=WfFromAf *)
+(* WfFromAf *)
 Lemma wf_from_af : 
    forall (X:Type) (p : WFT X) 
    (R : X -> X -> Prop) (T : X -> X -> Prop), 
    (forall x y, clos_trans_1n X T x y /\ R y x -> False) 
     -> SecureBy R p -> well_founded T.
-(*=End *)
 Proof.
 intros. unfold well_founded. intro y. 
 eapply acc_from_af. Focus 2. apply H0.
@@ -287,12 +275,11 @@ Focus 1. intros. eapply H. apply H2.
 Defined.
 
 (* A reassuring lemma *)
-(*=WfFromWqo *)
+(* WfFromWqo *)
 Lemma wf_from_wqo : 
   forall (X:Type) (p : WFT X) (R : X -> X -> Prop), 
          transitive X R -> SecureBy R p -> 
          well_founded (fun x y => R x y /\ not (R y x)).
-(*=End *)
 Proof.
 intros.
 apply wf_from_af with (R := R) (p := p). 
