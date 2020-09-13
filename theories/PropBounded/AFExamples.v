@@ -4,7 +4,6 @@ Require Import Lia.
 Require Import Wellfounded.
 Require Import List.
 Require Import Relations.
-Require Import Logic.
 
 From AlmostFull Require Import PropBounded.AlmostFull.
 From AlmostFull Require Import PropBounded.AlmostFullInduction.
@@ -22,8 +21,9 @@ Section Lexicographic.
  * flex (Z,_) = 1 
  * flex (_,Z) = 1 
  * flex (S x, S y) = f(x,S (S y)) + f(S x, y)
- *************************************************) 
+ *)
 Definition flex : forall (x:nat*nat), nat.
+Proof.
 pose (T x y := fst x < fst y \/ (fst x = fst y /\ snd x < snd y)).
 pose (R x y := fst x <= fst y /\ snd x <= snd y).
 eapply af_induction with (T := T) (R := R).
@@ -46,8 +46,9 @@ Defined.
  * grok (Z,_) = 1 
  * grok (_,Z) = 1
  * grol (S x, S y) = grok (S y, y) + grok(x,x) 
- ****************************************************)
-Definition grok : forall (x:nat*nat), nat. 
+ *)
+Definition grok : forall (x:nat*nat), nat.
+Proof.
 pose (T x y := (fst x <= snd y /\ snd x < snd y) \/ 
                (snd x < fst y /\ fst x < fst y)).
 pose (R x y := fst x <= fst y /\ snd x <= snd y).
@@ -70,14 +71,16 @@ Defined.
 End Lexicographic.
 
 Section Ranking.
+
 (* Argument flipping by cheating (cofmap)
  *
  * flip (Z,_) = 1 
  * flip (_,Z) = 1 
  * flip (S x, S y) = flip (S y,x)
- ***********************************************)
+ *)
 
 Definition flip1 : forall (x:nat*nat), nat.
+Proof.
 pose (T x y := fst x <= snd y /\ snd x < fst y).
 pose (R x y := fst x + snd x <= fst y + snd y).
 apply af_induction with (T := T) (R := R).
@@ -105,9 +108,10 @@ Section ArgFlip.
  * flip (Z,_) = 1 
  * flip (_,Z) = 1 
  * flip (S x, S y) = flip (y,x)
- ****************************************************)
+ *)
 
 Definition flip2 : forall (x:nat*nat), nat.
+Proof.
 pose (T x y := fst x < snd y /\ snd x < fst y).
 pose (R x y := fst x <= fst y /\ snd x <= snd y).
 eapply af_power_induction with (T := T) (R := R) (k := 2).

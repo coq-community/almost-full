@@ -3,7 +3,6 @@ Require Import Arith.
 Require Import Wellfounded.
 Require Import List.
 Require Import Relations.
-Require Import Logic.
 
 From AlmostFull Require Import PropBounded.AlmostFull.
 From AlmostFull Require Import PropBounded.AlmostFullInduction.
@@ -14,14 +13,13 @@ Unset Strict Implicit.
 Set Printing Implicit Defensive.
 Set Transparent Obligations.
 
-
-(*=DisjunctiveWF *)
+(* DisjunctiveWF *)
 Lemma disjunctive_wf : 
   forall (A:Type) (T R1 R2 : A -> A -> Prop) 
   (decR1 : dec_rel R1) (decR2 : dec_rel R2), 
   well_founded R1 -> well_founded R2 -> 
   (forall x y, clos_trans_1n A T x y ->  R1 x y \/ R2 x y) -> well_founded T.
-(*=End *)
+Proof.
 intros A T R1 R2 decR1 decR2 wfR1 wfR2 Hincl.
 pose (R x y := not (R1 y x) /\ not (R2 y x)).
 assert (almost_full R) as Raf.
@@ -32,7 +30,7 @@ apply wf_from_af with (R:=R).
 intros x y CT. destruct CT; firstorder. assumption.
 Defined.
 
-(*=TerminatorInduction *)
+(* TerminatorInduction *)
 Lemma disj_wf_induction:
  forall (A:Type) (T : A -> A -> Prop)
  (R1 R2 : A -> A -> Prop) 
@@ -40,11 +38,10 @@ Lemma disj_wf_induction:
  well_founded R1 -> well_founded R2 -> 
  (forall x y, clos_trans_1n A T x y ->  R1 x y \/ R2 x y) -> 
  forall P : A -> Type, 
- (forall x, (forall y, T y x -> P y) -> P x)
- -> forall a, P a.
-(*=End *)
+ (forall x, (forall y, T y x -> P y) -> P x) ->
+ forall a, P a.
+Proof.
 intros A T R1 R2 decR1 decR2 wfR1 wfR2 Hincl P.
 apply well_founded_induction_type with (R := T).
 apply disjunctive_wf with (R1 := R1) (R2 := R2); auto.
 Defined.
-
