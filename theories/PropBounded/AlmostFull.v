@@ -1,8 +1,8 @@
-Require Import Wf_nat.
-Require Import Arith.
-Require Import Wellfounded.
-Require Import List.
-Require Import Relations.
+From Coq Require Import Wf_nat.
+From Coq Require Import Arith.
+From Coq Require Import Wellfounded.
+From Coq Require Import List.
+From Coq Require Import Relations.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -16,7 +16,7 @@ Set Transparent Obligations.
  ****************************************************************)
 
 (* Decidable *)
-Definition dec_rel (X:Type) (R:X->X->Prop) := 
+Definition dec_rel (X:Type) (R:X->X->Prop) :=
   forall x y, {not (R y x)} + {R y x}.
 
 (* AF *)

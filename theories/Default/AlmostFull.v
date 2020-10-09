@@ -1,10 +1,10 @@
-Require Import Wf_nat.
-Require Import Arith.
-Require Import Lia.
-Require Import Wellfounded.
-Require Import List.
-Require Import Relations.
-Require Import FunctionalExtensionality.
+From Coq Require Import Wf_nat.
+From Coq Require Import Arith.
+From Coq Require Import Lia.
+From Coq Require Import Wellfounded.
+From Coq Require Import List.
+From Coq Require Import Relations.
+From Coq Require Import FunctionalExtensionality.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -99,8 +99,7 @@ Defined.
 Fixpoint ltree_aux m (x:nat) : WFT nat :=
   match m with 
   | O   => ZT nat 
-  | S n => SUP (fun y => if le_lt_dec x y 
-                         then ZT nat else ltree_aux n y)
+  | S n => SUP (fun y => if le_lt_dec x y then ZT nat else ltree_aux n y)
   end.
 
 Definition le_tree x := ltree_aux (S x) x.
@@ -185,8 +184,7 @@ intro x. remember (wfR x) as xAcc. clear HeqxAcc.
 apply (@well_founded_induction X R wfR 
          (fun (x:X) => forall (xAcc : Acc R x), 
                        SecureBy (fun y z  => ~ R z y \/ ~ R y x) 
-                                (af_tree_iter decR xAcc)
-         )).
+                                (af_tree_iter decR xAcc))).
 intros y H. intro xAccy.
 destruct xAccy. simpl.
 intro z. destruct (decR y z). simpl. right. right. apply n.
@@ -226,11 +224,14 @@ Defined.
  ****************************************************************)
 
 Lemma trans_clos_left : forall X (T : X -> X -> Prop) z y z0, 
-      T z y -> clos_refl_trans X T z0 z -> clos_refl_trans X T z0 y.
-intros. eapply rt_trans. apply H0. apply rt_step. apply H. Qed.
+ T z y -> clos_refl_trans X T z0 z -> clos_refl_trans X T z0 y.
+Proof.
+intros. eapply rt_trans. apply H0. apply rt_step. apply H.
+Qed.
 
 Lemma trans_clos_left_aux : forall X (T : X -> X -> Prop) z y z0, 
-      T z y -> clos_refl_trans X T z0 z -> clos_trans_1n X T z0 y.
+  T z y -> clos_refl_trans X T z0 z -> clos_trans_1n X T z0 y.
+Proof.
 intros X T z y z0 H Hrt. 
 remember (@Relation_Operators.t1n_step X T z y H) as G. clear HeqG; clear H. 
 remember (@clos_rt_rt1n _ T z0 z Hrt) as F. clear HeqF. clear Hrt.

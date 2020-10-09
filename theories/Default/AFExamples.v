@@ -1,13 +1,13 @@
-Require Import Wf_nat.
-Require Import Arith.
-Require Import Lia.
-Require Import Wellfounded.
-Require Import List.
-Require Import Relations.
+From Coq Require Import Wf_nat.
+From Coq Require Import Arith.
+From Coq Require Import Lia.
+From Coq Require Import Wellfounded.
+From Coq Require Import List.
+From Coq Require Import Relations.
 
-From AlmostFull Require Import Default.AlmostFull.
-From AlmostFull Require Import Default.AlmostFullInduction.
-From AlmostFull Require Import Default.AFConstructions.
+From AlmostFull.Default Require Import AlmostFull.
+From AlmostFull.Default Require Import AlmostFullInduction.
+From AlmostFull.Default Require Import AFConstructions.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -499,8 +499,8 @@ apply af_sum_lift; apply leq_af.
 (* prove intersection emptyness *)
 intros x y (CTxy,Ryx). 
 induction CTxy. destruct x; destruct y; unfold lift_rel_union in *; unfold sum_lift in *.
-   unfold TA in *; lia. destruct Ryx. destruct Ryx. 
-   unfold TB in *; lia.
+unfold TA in *; lia. destruct Ryx. destruct Ryx. 
+unfold TB in *; lia.
 assert (funny_compare y z). apply funny_compare_lemma. apply CTxy; clear CTxy.
 destruct x; destruct y; destruct z; unfold funny_compare in *; simpl in *.
 unfold TA in *; firstorder.
@@ -516,15 +516,16 @@ unfold sum_lift in *; firstorder; lia.
 unfold TB in *; firstorder; lia.
 unfold TB in *; firstorder; lia.
 (* give the functionals *)
-  refine (fun x => match x as w return (forall y, TA y w -> nat) -> (forall y, SB y w -> nat) -> nat with 
-                    | O   => fun self_rec other_rec => 1 
-                    | S x => fun self_rec other_rec => (@self_rec x _ + @other_rec (S (S x)) _)%nat
-                   end). unfold TA. lia. unfold SB. auto.
-  refine (fun x => match x as w return (forall y, TB y w -> nat) -> (forall y, SA y w -> nat) -> nat with 
-                    | O       => fun self_rec other_rec => 1
-                    | S O     => fun self_rec other_rec => 1 
-                    | S (S x) => fun self_rec other_rec => @other_rec x _
-                   end). firstorder.
+refine (fun x => match x as w return (forall y, TA y w -> nat) -> (forall y, SB y w -> nat) -> nat with
+                  | O   => fun self_rec other_rec => 1 
+                  | S x => fun self_rec other_rec => (@self_rec x _ + @other_rec (S (S x)) _)%nat
+                 end). unfold TA. lia. unfold SB. auto.
+refine (fun x => match x as w return (forall y, TB y w -> nat) -> (forall y, SA y w -> nat) -> nat with
+                  | O       => fun self_rec other_rec => 1
+                  | S O     => fun self_rec other_rec => 1 
+                  | S (S x) => fun self_rec other_rec => @other_rec x _
+              end).
+firstorder.
 Defined.
 
 End MutualInduction.

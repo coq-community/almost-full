@@ -1,19 +1,18 @@
-Require Import Wf_nat.
-Require Import Arith.
-Require Import Lia.
-Require Import Wellfounded.
-Require Import List.
-Require Import Relations.
+From Coq Require Import Wf_nat.
+From Coq Require Import Arith.
+From Coq Require Import Lia.
+From Coq Require Import Wellfounded.
+From Coq Require Import List.
+From Coq Require Import Relations.
 
-From AlmostFull Require Import PropBounded.AlmostFull.
-From AlmostFull Require Import PropBounded.AlmostFullInduction.
-From AlmostFull Require Import PropBounded.AFConstructions.
+From AlmostFull.PropBounded Require Import AlmostFull.
+From AlmostFull.PropBounded Require Import AlmostFullInduction.
+From AlmostFull.PropBounded Require Import AFConstructions.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
 Set Printing Implicit Defensive.
 Set Transparent Obligations.
-
 
 Section Lexicographic.
 
@@ -139,8 +138,8 @@ Defined.
 
 End ArgFlip.
 
-
 Section SCT.
+
 (* An example from size-change termination
  * [From Amir Ben-Amram's paper General Size-Change Termination and lexicographic descent]
  * gnlex (x,Z)     = 1 
@@ -148,16 +147,18 @@ Section SCT.
  * gnlex (S x,S y) = gnlex (S y, y) + gnlex (S y, x) 
  *******************************************************************************************)
 
-(*=GNLexRelations *)
+(* GNLexRelations *)
 Definition T x y := (fst x = snd y /\ snd x < snd y) \/ 
-                      (fst x = snd y /\ snd x < fst y).
+                    (fst x = snd y /\ snd x < fst y).
+
 Definition R x y := fst x <= fst y /\ snd x <= snd y.
-(*=End *)
+
 Lemma T2_invariant: 
   forall x y, power 2 T x y ->   
     fst x < fst y /\ snd x < fst y \/ 
     snd x < snd y /\ fst x < snd y \/ 
     fst x < fst y /\ snd x < snd y.
+Proof.
 intros x y T2.
 destruct T2 as (z,(Txz,(z0,(Tzz0,Zeq)))). unfold T in *.
 simpl in Zeq.
@@ -173,6 +174,7 @@ Lemma T2_ct_invariant:
     fst x < fst y /\ snd x < fst y \/ 
     snd x < snd y /\ fst x < snd y \/ 
     fst x < fst y /\ snd x < snd y.
+Proof.
 intros x y CT.
 induction CT. 
 (* base case *) 
@@ -192,8 +194,9 @@ destruct G as [G1 | [G2 | G3]]; destruct IHCT as [IH1 | [IH2 | IH3]].
   right; right; lia.
 Defined.
 
-(*=GNLex *)
+(* GNLex *)
 Definition gnlex_pow2 : forall (x:nat*nat), nat.
+Proof.
 apply af_power_induction with (T:=T) (R:=R) (k:=2). lia.
 (* prove almost_full *) 
 apply af_intersection; 
@@ -211,11 +214,9 @@ refine (fun x => match x as w
 unfold T in *. left. simpl; lia.
 unfold T in *. right. simpl; lia.
 Defined.
-(*=End *)
 
-
-Lemma T_empty_intersect: forall x y, 
-        clos_trans_1n _ T x y -> R y x -> False.
+Lemma T_empty_intersect: forall x y, clos_trans_1n _ T x y -> R y x -> False.
+Proof.
 intros x y CT HR.
 assert (T x y \/ clos_trans_1n (nat*nat) (power 2 T) x y \/ 
         exists z, T x z /\ clos_trans_1n _ (power 2 T) z y).
@@ -241,8 +242,9 @@ exists y. split. apply H. exists x0. split. auto. simpl. reflexivity.
 apply H1.
 Defined.
 
-(*=GNLexSimple *)
+(* GNLexSimple *)
 Definition gnlex: forall (x:nat*nat), nat.
+Proof.
 apply af_induction with (T:=T) (R:=R).
 (* prove almost_full *) 
 apply af_intersection; 
@@ -260,22 +262,21 @@ refine (fun x => match x as w
 unfold T in *. left. simpl; lia.
 unfold T in *. right. simpl; lia.
 Defined.
-(*=End *)
 
 End SCT.
 
 Section SumExample.
 
-(*=FSumRelations *)
+(* FSumRelations *)
 Definition Tfsum := fun x y => 
    (exists x0, x = inr nat (x0+2)%nat /\ y = inl nat (S x0)) \/ 
    (exists x0, x = inl nat (x0-2) /\ y = inr nat x0).
-Definition Rfsum := sum_lift le le.
-(*=End *)
 
-Lemma fsum_pow2_empty:
-   forall x y : nat + nat,
-   clos_trans_1n (nat + nat) (power 2 Tfsum) x y /\ Rfsum y x -> False.
+Definition Rfsum := sum_lift le le.
+
+Lemma fsum_pow2_empty: forall x y : nat + nat,
+ clos_trans_1n (nat + nat) (power 2 Tfsum) x y /\ Rfsum y x -> False.
+Proof.
 intros.
 destruct H.
 induction H.
@@ -423,8 +424,9 @@ Qed.
  * fsum (inr x)     = fsum (inl (x-2)) 
  ******************************************************)
 
-(*=FSum *)
+(* FSum *)
 Definition fsum: forall (x:nat+nat), nat.
+Proof.
 apply af_power_induction 
   with (T := Tfsum) (R := Rfsum) (k := 2). lia.
 (* prove almost_full *)
@@ -441,11 +443,8 @@ refine (fun x => match x as w
 left. exists x. intuition.
 right. exists x. intuition.
 Defined.
-(*=End *)
 
 End SumExample.
-
-
 
 Section MutualInduction.
 
@@ -466,9 +465,9 @@ Definition funny_compare := fun x y =>
   | (inr x, inr y) => x <= y
   end.
 
-Lemma funny_compare_lemma: 
-   forall x y,  clos_trans_1n (nat+nat) (lift_rel_union TA TB SA SB) x y -> 
-                funny_compare x y.
+Lemma funny_compare_lemma:  forall x y,
+  clos_trans_1n (nat+nat) (lift_rel_union TA TB SA SB) x y -> funny_compare x y.
+Proof.
 intros. induction H.
 destruct x; destruct y; unfold funny_compare in *; simpl in *.
 unfold TA in *; lia.
@@ -487,6 +486,7 @@ unfold TB in *; lia.
 Defined.
 
 Definition f_and_g : (nat -> nat) * (nat -> nat).
+Proof.
 eapply af_mut_induction 
   with (R := sum_lift le le)
        (TA := TA)
