@@ -1,11 +1,11 @@
-Require Import Wf_nat.
-Require Import Arith.
-Require Import Lia.
-Require Import Wellfounded.
-Require Import List.
-Require Import Relations.
+From Coq Require Import Wf_nat.
+From Coq Require Import Arith.
+From Coq Require Import Lia.
+From Coq Require Import Wellfounded.
+From Coq Require Import List.
+From Coq Require Import Relations.
 
-From AlmostFull Require Import PropBounded.AlmostFull.
+From AlmostFull.PropBounded Require Import AlmostFull.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -75,8 +75,7 @@ Defined.
 Lemma oplus_unary (X:Type) (A B : X -> Prop):
   forall R, almost_full R -> 
   forall T, almost_full T -> 
-  forall C, 
-  (forall x y, R x y -> C x y \/ A x) -> 
+  forall C, (forall x y, R x y -> C x y \/ A x) -> 
   (forall x y, T x y -> C x y \/ B x) -> 
   almost_full (fun x y => C x y \/ (A x /\ B x)).
 Proof.

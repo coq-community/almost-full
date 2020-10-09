@@ -1,11 +1,11 @@
-Require Import Wf_nat.
-Require Import Arith.
-Require Import Lia.
-Require Import Wellfounded.
-Require Import List.
-Require Import Relations.
+From Coq Require Import Wf_nat.
+From Coq Require Import Arith.
+From Coq Require Import Lia.
+From Coq Require Import Wellfounded.
+From Coq Require Import List.
+From Coq Require Import Relations.
 
-From AlmostFull Require Import Default.AlmostFull.
+From AlmostFull.Default Require Import AlmostFull.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
