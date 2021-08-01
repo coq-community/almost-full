@@ -60,7 +60,7 @@ Proof.
 intros X p. induction p.
 intros A B H H0. simpl in H0. simpl. auto.
 intros A B H0 H1. simpl in H1. simpl. intro x. 
-remember (H1 x) as G. eapply H. Focus 2. apply G. Focus 1. 
+remember (H1 x) as G. eapply H. 2: apply G.
 intros. simpl in H2. destruct H2. left. apply H0. apply H2. right. 
 apply H0. apply H2.
 Qed.
@@ -144,10 +144,10 @@ apply lt_wf.
 intros. unfold le_tree. simpl. 
 intro y. destruct (le_lt_dec x y). simpl. intros. right. right. apply l.
 rewrite -> le_tree_rewrite_aux. eapply sec_strengthen. 
-Focus 2. apply H. apply l.
-Focus 1. intros. simpl. simpl in H0. destruct H0.
+2: { apply H. apply l. }
+intros. simpl. simpl in H0. destruct H0.
 left. left. apply H0. right. left. apply H0.
-Focus 1. firstorder.
+firstorder.
 Qed.
 
 (* Generalization to an arbitrary decidable well-founded relation *)
@@ -188,7 +188,7 @@ apply (@well_founded_induction X R wfR
 intros y H. intro xAccy.
 destruct xAccy. simpl.
 intro z. destruct (decR y z). simpl. right. right. apply n.
-eapply sec_strengthen. Focus 2. apply H. apply r. Focus 1.
+eapply sec_strengthen. 2: { apply H. apply r. }
 intros. simpl in H0. destruct H0. left. left. apply H0. 
 right. left. apply H0.
 Defined. (* Not Qed because we want to compute with it *)
@@ -210,7 +210,7 @@ Proof.
 unfold almost_full.
 cut (dec_rel lt). intro decLt.
 eexists (SUP (af_tree lt_wf decLt)).
- eapply sec_strengthen. Focus 2. apply secure_from_wf. 
+ eapply sec_strengthen. 2: apply secure_from_wf.
 intros. simpl in H. lia.
 unfold dec_rel. intros. destruct (le_lt_dec x y).
 left; lia.
@@ -254,13 +254,13 @@ intros.
 apply Acc_intro. intros z HT. 
 simpl in H1. remember (H1 y). 
 eapply H with (R := fun y0 z => R y0 z \/ R y y0). 
-Focus 2. apply s. Focus 1. intros. simpl in H2.
+2: apply s. intros. simpl in H2.
 simpl in H3. destruct H3. destruct H4.
 eapply H0. eapply trans_clos_left. apply HT. apply H2.
 split. apply H3. apply H4. eapply H0. eapply trans_clos_left. 
 apply HT. apply H2. split. apply H3. 
-destruct (H0 z0 y). apply rt_refl. split. Focus 2. apply H4. 
-Focus 1. eapply trans_clos_left_aux. apply HT. apply H2.
+destruct (H0 z0 y). apply rt_refl. split. 2: apply H4. 
+eapply trans_clos_left_aux. apply HT. apply H2.
 Defined.
 
 (* WfFromAf *)
@@ -271,8 +271,8 @@ Lemma wf_from_af :
     -> SecureBy R p -> well_founded T.
 Proof.
 intros. unfold well_founded. intro y. 
-eapply acc_from_af. Focus 2. apply H0.
-Focus 1. intros. eapply H. apply H2. 
+eapply acc_from_af. 2: apply H0.
+intros. eapply H. apply H2.
 Defined.
 
 (* A reassuring lemma *)

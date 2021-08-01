@@ -220,16 +220,17 @@ Proof.
 intros x y CT HR.
 assert (T x y \/ clos_trans_1n (nat*nat) (power 2 T) x y \/ 
         exists z, T x z /\ clos_trans_1n _ (power 2 T) z y).
-Focus 2.
-destruct H.
-destruct H. destruct HR. lia.
-destruct HR. lia.
-destruct H.
-destruct (T2_ct_invariant H). destruct HR. lia.
-destruct HR. lia.
-destruct H. destruct H.
-destruct (T2_ct_invariant H0). firstorder; lia.
-firstorder; lia.
+2: {
+  destruct H.
+  destruct H. destruct HR. lia.
+  destruct HR. lia.
+  destruct H.
+  destruct (T2_ct_invariant H). destruct HR. lia.
+  destruct HR. lia.
+  destruct H. destruct H.
+  destruct (T2_ct_invariant H0). firstorder; lia.
+  firstorder; lia.
+}
 clear HR.
 induction CT. left; auto.
 destruct IHCT. right. left. constructor. exists y. auto. split. apply H. 

@@ -133,9 +133,10 @@ induction p.
                   (fun ys => B (x::ys))).
      apply H4.
      apply H5.
-     Focus 3.
-     intros. destruct H8. destruct H8. left. left. auto. destruct H8. right. left. auto.
-     left. right; auto. right. auto. 
+     3: {
+       intros. destruct H8. destruct H8. left. left. auto. destruct H8. right. left. auto.
+       left. right; auto. right. auto. 
+     }
      auto. auto.
 Defined.
 

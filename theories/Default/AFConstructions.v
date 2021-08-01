@@ -60,23 +60,25 @@ Lemma oplus_nullary_sec_intersection:
             (oplus_nullary p q).
 Proof.
 intros X p. induction p. intros. simpl. simpl in H. eapply sec_strengthen.
-Focus 2. apply H0. Focus 1. intros. simpl in H1. destruct H1. left. apply H1. 
+2: apply H0. intros. simpl in H1. destruct H1. left. apply H1. 
 destruct (H x y). left. apply H2. right. auto.
-Focus 1. intros.
+intros.
 simpl. 
 simpl in H0. intro x. remember (H0 x). 
 remember (@H x q (fun y z => C y z \/ C x y) A B). eapply sec_strengthen.
-Focus 2. apply s0. clear Heqs. clear H0. eapply sec_strengthen. Focus 2. apply s.
-Focus 1. intros. simpl in H0. destruct H0. destruct H0. left. left. apply H0. right. apply H0.
-destruct H0. left. right. apply H0.
-right. apply H0.
-subst.
-eapply sec_strengthen. Focus 2. apply H1.
-intros. simpl in H2. destruct H2.
-left. left.
-apply H2.
-right.
-apply H2.
+2: { 
+  apply s0. clear Heqs. clear H0. eapply sec_strengthen. 2: apply s.
+  intros. simpl in H0. destruct H0. destruct H0. left. left. apply H0. right. apply H0.
+  destruct H0. left. right. apply H0.
+  right. apply H0.
+  subst.
+  eapply sec_strengthen. 2: apply H1.
+  intros. simpl in H2. destruct H2.
+  left. left.
+  apply H2.
+  right.
+  apply H2.
+}
 intros.
 simpl in H2.
 destruct H2.
@@ -117,15 +119,13 @@ Lemma oplus_unary_sec_intersection:
             (oplus_unary p q).
 Proof.
 intros X p.
-induction p. simpl. intros. eapply sec_strengthen. Focus 2. apply H0. Focus 1.
+induction p. simpl. intros. eapply sec_strengthen. 2: apply H0.
 intros. simpl in H1. destruct (H x y). left. apply H2. destruct H1. left. apply H1. right. split. apply H2. apply H1.
-Focus 1. 
 intro q. induction q. intros. simpl. simpl in H1. intro x. simpl in H0.
-remember (H0 x). eapply sec_strengthen. Focus 2. apply s. Focus 1. intros.
+remember (H0 x). eapply sec_strengthen. 2: apply s. intros.
 simpl in H2. destruct H2. destruct H2. destruct (H1 x y). left. left. apply H2. left. left. apply H2.
 destruct (H1 x0 y). left. left. apply H3. left. right. split. apply H2. apply H3.
 destruct (H1 x x0). right. left. apply H3. destruct H2. right. left. apply H2. right. right. auto.
-Focus 1.
 intros.
 rewrite oplus_unary_sup_sup. rewrite sup_rewrite.
 intro x.
@@ -134,14 +134,17 @@ assert (SecureBy (fun y z => (C y z \/ C x y \/ A y /\ B y) \/ (A x /\ B x))
 apply oplus_nullary_sec_intersection.
 simpl in H1. remember (H1 x) as G1. clear HeqG1. clear H1.
 remember (@H x (SUP w0) C (fun y => C x y \/ A y \/ A x) B).
-eapply sec_strengthen. Focus 2. apply s. eapply sec_strengthen.
-Focus 2. eapply G1. Focus 1. intros. simpl in H1.
-destruct H1. destruct H1.
-left; apply H1.
-right; right; left; apply H1.
-destruct H1. right; left; apply H1.
-right; right; right; apply H1.
-Focus 1. apply H2. Focus 1.
+eapply sec_strengthen. 
+2: { 
+  apply s. eapply sec_strengthen.
+  2: eapply G1. intros. simpl in H1.
+  destruct H1. destruct H1.
+  left; apply H1.
+  right; right; left; apply H1.
+  destruct H1. right; left; apply H1.
+  right; right; right; apply H1.
+  apply H2.
+}
 intros.
 destruct H1.
 left; left; auto.
@@ -154,18 +157,21 @@ right; auto.
 
 simpl in H2. remember (H2 x) as G2. clear HeqG2.
 remember (@H0 x C A (fun y => C x y \/ B y \/ B x)).
-eapply sec_strengthen. Focus 2. apply s. eapply sec_strengthen.
-Focus 2. apply H1. Focus 1. intros. simpl in H3. auto.
-eapply sec_strengthen. Focus 2. eapply G2. Focus 1.
-
-intros. simpl in H3. destruct H3. destruct H3. left. apply H3. right.
-right. left. apply H3. destruct H3. right. left. apply H3. right.
-right. right. apply H3. Focus 2.
-
-eapply sec_strengthen. Focus 2. apply H3. Focus 1.
+eapply sec_strengthen.
+2: { 
+  apply s. eapply sec_strengthen.
+  2: apply H1. intros. simpl in H3. auto.
+  eapply sec_strengthen. 2: eapply G2.
+  intros. simpl in H3. destruct H3. destruct H3. left. apply H3. right.
+  right. left. apply H3. destruct H3. right. left. apply H3. right.
+  right. right. apply H3.
+}
+2: {
+eapply sec_strengthen. 2: apply H3.
 intros. simpl in H4. destruct H4. destruct H4. left. left. apply H4.
 destruct H4. right. left. apply H4. left. right. apply H4.
 right. right. apply H4.
+}
 
 intros. destruct H3.
 left; left; auto.
@@ -216,9 +222,8 @@ intros X p. induction p.
 intros. simpl in H. simpl. eapply sec_strengthen. intros. split. apply H. apply H1.
 apply H0.
 intro q. induction q.
-intros. simpl in H0. simpl in H1. simpl. intros. eapply sec_strengthen. Focus 2. apply H0. Focus 1.
+intros. simpl in H0. simpl in H1. simpl. intros. eapply sec_strengthen. 2: apply H0.
 intros. simpl in H2. destruct H2. left. split. apply H2. apply H1. right. split. apply H2. apply H1.
-Focus 1.
 intros.
 rewrite oplus_binary_sup_sup. rewrite sup_rewrite.
 intro x. 
@@ -230,14 +235,13 @@ simpl in IHp.
 assert (SecureBy
           (fun x0 y : X => A x0 y /\ B x0 y \/ B x x0)
           (oplus_binary (SUP w) (w0 x))) as IHqSimpler.
-eapply sec_strengthen. Focus 2. apply IHq. Focus 1. intros. simpl in H0. firstorder.
-Focus 1. clear IHq. clear G1. clear G2. clear H1. clear H. clear H2.
+eapply sec_strengthen. 2: apply IHq. intros. simpl in H0. firstorder.
+clear IHq. clear G1. clear G2. clear H1. clear H. clear H2.
 eapply oplus_unary_sec_intersection. eapply sec_strengthen.
-Focus 2. apply IHp. Focus 1. intros. simpl in H.
+2: apply IHp. intros. simpl in H.
 destruct H. destruct H. left. auto. right. auto.
-Focus 1. 
-eapply sec_strengthen. Focus 2. eapply IHqSimpler.
-Focus 1. intros. simpl in H. destruct H. left. auto. right. auto.
+eapply sec_strengthen. 2: eapply IHqSimpler.
+intros. simpl in H. destruct H. left. auto. right. auto.
 Defined.
 
 (* AfIntersection *)
@@ -261,7 +265,7 @@ apply H. simpl in H0. simpl. intros. left. apply H0.
 simpl. intro x. simpl in H0.
 remember (H0 x) as G0.
 apply H. simpl. intros. eapply sec_strengthen.
-Focus 2. apply H0. Focus 1.
+2: apply H0.
 intros. simpl in H2. destruct H2. left. left. apply H2.
 right. left. apply H2.
 Defined.
@@ -271,7 +275,7 @@ Lemma sec_nullary_left : forall (X : Type) (q : WFT X) (s : WFT X) (R : X -> X -
 Proof.
 intros X q. induction q. intros. simpl in H. simpl.
 induction s. simpl. apply H. simpl. intro x. eapply sec_strengthen.
-Focus 2. apply H0. Focus 1. intros. left. apply H1. Focus 1.
+2: apply H0. intros. left. apply H1.
 intros. induction s.
 simpl. simpl in H0. 
 intro x. simpl. apply H. apply H0.
@@ -283,7 +287,7 @@ Lemma sec_unary_left : forall (X : Type) (q : WFT X) (s : WFT X) (R : X -> X -> 
 Proof.
 intros X q. induction q. intros. simpl in H. simpl.
 induction s. simpl. apply H. simpl. intro x. eapply sec_strengthen.
-Focus 2. apply H0. Focus 1. intros. left. apply H1. Focus 1.
+2: apply H0. intros. left. apply H1.
 intros. induction s.
 simpl. simpl in H0. 
 intro x. apply H0. simpl.
@@ -298,11 +302,11 @@ intros X q. induction q.
 intros. simpl. apply H. intros.
 induction s. simpl in H0. apply sec_unary_left. simpl.
 intros. remember (w x). clear Heqw0. induction w0. simpl. intros. left. apply H0.
-simpl. intro x0. eapply sec_strengthen. Focus 2. apply H1. Focus 1.
-intros. simpl in H2. right. right. apply H0. Focus 1.
+simpl. intro x0. eapply sec_strengthen. 2: apply H1.
+intros. simpl in H2. right. right. apply H0.
 simpl. intro x.
 apply sec_nullary_left.
-apply H. eapply sec_strengthen. Focus 2. apply H0. Focus 1.
+apply H. eapply sec_strengthen. 2: apply H0.
 intros. left. apply H2.
 Defined.
 
@@ -311,7 +315,7 @@ Lemma sec_binary_left : forall (X : Type) (q : WFT X) (s : WFT X) (R : X -> X ->
 Proof.
 intros X q. induction q. intros. simpl in H. simpl.
 induction s. simpl. apply H. simpl. intro x. eapply sec_strengthen.
-Focus 2. apply H0. Focus 1. intros. left. apply H1. Focus 1.
+2: apply H0. intros. left. apply H1.
 intros. induction s.
 simpl. simpl in H0. 
 intro x. apply H0. simpl.
@@ -326,11 +330,11 @@ intros X q. induction q.
 intros. simpl. apply H. intros.
 induction s. simpl in H0. apply sec_binary_left. simpl.
 intros. remember (w x). clear Heqw0. induction w0. simpl. intros. left. apply H0.
-simpl. intro x0. eapply sec_strengthen. Focus 2. apply H1. Focus 1.
-intros. simpl in H2. right. right. apply H0. Focus 1.
+simpl. intro x0. eapply sec_strengthen. 2: apply H1.
+intros. simpl in H2. right. right. apply H0.
 simpl. intro x.
 apply sec_unary_left.
-apply H. eapply sec_strengthen. Focus 2. apply H0. Focus 1.
+apply H. eapply sec_strengthen. 2: apply H0.
 intros. left. apply H2.
 Defined.
 
@@ -464,12 +468,12 @@ destruct w; (repeat (auto; firstorder)).
 destruct v; (repeat (auto; firstorder)).
 destruct w; (repeat (auto; firstorder)).
 intros. simpl. intro x. destruct x; repeat auto.
-eapply sec_strengthen. Focus 2. apply H. apply H0. 
+eapply sec_strengthen. 2: { apply H. apply H0. }
 intros. destruct x0; repeat (auto; firstorder).
         destruct y; repeat (auto; firstorder).
 simpl in *. intro x.
 destruct x; repeat (auto; firstorder). 
-eapply sec_strengthen. Focus 2. apply H. apply H0. 
+eapply sec_strengthen. 2: { apply H. apply H0. }
 intros. destruct x0; repeat (auto;firstorder).
         destruct y0; repeat (auto;firstorder).
 Defined.
@@ -560,7 +564,7 @@ assert (almost_full (fun x y => f1 x <= f1 y /\ f2 x <= f2 y)).
 apply af_intersection. apply af_cofmap. apply leq_af.
                        apply af_cofmap. apply leq_af.
 unfold almost_full in *. destruct H. exists x.
-eapply sec_strengthen. Focus 2. apply H. Focus 1.
+eapply sec_strengthen. 2: apply H.
 intros; simpl. destruct x0. destruct y. simpl in H0.
 unfold eq_fin. lia.
 Defined.
