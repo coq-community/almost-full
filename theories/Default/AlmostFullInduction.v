@@ -109,7 +109,7 @@ induction m. firstorder. intros. simpl.
 remember (k - S n) as j. 
 destruct j. lia.
 assert (S (m + n) = (m + (S n))%nat).
-Focus 2. rewrite H0. apply IHm. lia.
+2: { rewrite H0. apply IHm. lia. }
 lia.
 Defined.
 
@@ -231,14 +231,15 @@ destruct H0. destruct H1. destruct H1.
 destruct (eq_nat_dec k (S m)).
 (* Case that we have to wrap-around *)
 exists O. split. lia. split.
-Focus 2. left.
-assert (power k T (snd x) (snd x0)).
-subst k. simpl. exists (snd y). split. destruct H. apply H3.
-apply H1. split. reflexivity.
-eapply ct_from_ctr. Focus 2. apply H2. Unfocus.
-Focus 2. 
-constructor 1.
-subst k. simpl. exists (snd y). split. destruct H. apply H4. apply H1.
+2: { 
+  left.
+  assert (power k T (snd x) (snd x0)).
+  subst k. simpl. exists (snd y). split. destruct H. apply H3.
+  apply H1. split. reflexivity.
+  eapply ct_from_ctr. 2: apply H2.
+  constructor 1.
+  subst k. simpl. exists (snd y). split. destruct H. apply H4. apply H1.
+}
 destruct x as ((kx,Hx),x).
 destruct y as ((ky,Hy),y).
 destruct z as ((kz,Hz),z).
@@ -252,10 +253,12 @@ rewrite H4. auto. destruct H. subst ky.
 apply plus_mod_suc. lia. 
 (* No wraparound needed here *)
 exists (S m). split.  lia.
-split. Focus 2. right. split. lia. 
-exists x0. split. simpl. exists (snd y). split. destruct H. apply H3.
-apply H1. apply H2.
-
+split. 
+2: {
+  right. split. lia. 
+  exists x0. split. simpl. exists (snd y). split. destruct H. apply H3.
+  apply H1. apply H2. 
+}
 destruct x as ((kx,Hx),x).
 destruct y as ((ky,Hy),y).
 destruct z as ((kz,Hz),z).
@@ -352,7 +355,7 @@ Proof.
 intros.
 destruct (le_lt_dec k 1). assert (k = 1). lia. 
 apply af_induction with (T := T) (R := R). apply H0. 
-intros. eapply H1. split. Focus 2. destruct H3. apply r. 
+intros. eapply H1. split. 2: { destruct H3. apply r. }
 subst k. simpl. 
 destruct H3. clear H3 H H1 l. induction H2. constructor. exists y. auto.
 constructor 2 with (y := y). exists y. auto. auto.

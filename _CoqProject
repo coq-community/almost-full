@@ -1,8 +1,5 @@
 -Q theories AlmostFull
 
--arg -w -arg -deprecated-focus
--arg -w -arg -deprecated-unfocus
-
 theories/Default/AFConstructions.v
 theories/Default/AFExamples.v
 theories/Default/AlmostFullInduction.v

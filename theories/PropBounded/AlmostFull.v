@@ -141,7 +141,7 @@ intros.
 intros. destruct H3. destruct H4.
 eapply H1. eapply trans_clos_left. apply HT.
 apply H2. split. apply H3. apply H4.
-eapply H1. apply rt_refl. split. Focus 2. apply H4. Focus 1.
+eapply H1. apply rt_refl. split. 2: apply H4.
 eapply trans_clos_left_aux. apply HT. apply H2. 
 Defined.
 
@@ -152,8 +152,8 @@ Lemma wf_from_af :
   almost_full R -> well_founded T.
 Proof.
 intros. unfold well_founded. intro y. 
-eapply acc_from_af. Focus 2. 
-intros. eapply H. apply H2. Focus 1.
+eapply acc_from_af. 
+2: { intros. eapply H. apply H2. }
 induction H0. apply AF_ZT. apply H0.
 apply AF_SUP. 
 intros. apply H0.
