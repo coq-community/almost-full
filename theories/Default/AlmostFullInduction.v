@@ -1,10 +1,4 @@
-From Coq Require Import Wf_nat.
-From Coq Require Import Arith.
-From Coq Require Import Lia.
-From Coq Require Import Wellfounded.
-From Coq Require Import List.
-From Coq Require Import Relations.
-
+From Coq Require Import Arith Relations Lia.
 From AlmostFull.Default Require Import AlmostFull.
 From AlmostFull.Default Require Import AFConstructions.
 
@@ -88,9 +82,9 @@ Lemma plus_mod_aux_fin k n (x:nat):
 Proof.
 generalize dependent k. generalize dependent x.
 induction n. auto. intros. simpl. destruct k. lia.
-simpl. destruct (eq_nat_dec (S k) (S x)). auto. inversion e.
-rewrite minus_diag.  apply IHn. auto. lia.
-assert (k - x <> O). lia. set (k - x) as diff.
+simpl. destruct (Nat.eq_dec (S k) (S x)). auto. inversion e.
+rewrite Nat.sub_diag.  apply IHn. auto. lia.
+assert (k - x <> O) by lia. set (k - x) as diff.
 fold diff in H0. destruct diff. firstorder.
 apply IHn. lia.
 Defined.
@@ -204,7 +198,7 @@ destruct x as ((kx,Hx),x).
 destruct y as ((ky,Hy),y). simpl in H.
 exists 1. split. firstorder. split. destruct H. destruct H. destruct H. subst k.
 unfold plus_mod. unfold fst. unfold eq_fin. auto. unfold plus_mod_aux. simpl. 
-rewrite minus_diag. apply H1. unfold plus_mod. unfold fst. unfold eq_fin.
+rewrite Nat.sub_diag. apply H1. unfold plus_mod. unfold fst. unfold eq_fin.
 auto. unfold plus_mod_aux. remember (k - S kx) as diff. destruct diff.
 lia. lia. right. split. lia. 
 exists (@FinIntro k ky Hy, y).
@@ -265,9 +259,9 @@ destruct z as ((kz,Hz),z).
 unfold fst. unfold plus_mod. unfold eq_fin. unfold plus_mod in HEqfin. 
 unfold fst in *. unfold snd in *. unfold eq_fin in HEqfin. subst kz.
 unfold lift_diag in H. unfold fst in H. unfold snd in H. destruct H.
-unfold next_fin in H. destruct H. destruct H. subst. 
-simpl. rewrite minus_diag. reflexivity. simpl.
-destruct H. subst ky. 
+unfold next_fin in H. destruct H. destruct H. subst.
+simpl. rewrite Nat.sub_diag. reflexivity. simpl.
+destruct H. subst ky.
 remember (k - S kx) as diff. destruct diff. lia. reflexivity.
 Defined.
 
@@ -275,7 +269,7 @@ Lemma diag_pow_decomp_mod k X T:
  forall x y, k > 1 -> 
  clos_trans_1n _ (@lift_diag k X T) x y -> 
     clos_trans_1n X (power k T) (snd x) (snd y) /\ eq_fin (fst x) (fst y) \/ 
-    not (eq_fin (fst x) (fst y)).
+    ~ (eq_fin (fst x) (fst y)).
 Proof.
 intros x y kGt CT. 
 destruct (diag_pow_decomp kGt CT) as (m,H).

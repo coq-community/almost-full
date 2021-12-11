@@ -1,10 +1,4 @@
-From Coq Require Import Wf_nat.
-From Coq Require Import Arith.
-From Coq Require Import Lia.
-From Coq Require Import Wellfounded.
-From Coq Require Import List.
-From Coq Require Import Relations.
-
+From Coq Require Import Arith Wf_nat Lia.
 From AlmostFull.PropBounded Require Import AlmostFull.
 
 Set Implicit Arguments.
@@ -20,7 +14,7 @@ Set Transparent Obligations.
 
 (* AfUnion *)
 Corollary af_union: 
- forall (X:Type) (A B : X -> X -> Prop),
+ forall (X : Type) (A B : X -> X -> Prop),
  almost_full A -> almost_full (fun x y => A x y \/ B x y).
 Proof.
 intros X A B afA. eapply af_strengthen. apply afA. auto.
@@ -34,7 +28,7 @@ Defined.
  ****************************************************************)
 
 (* OplusNullaryLemma *)
-Lemma oplus_nullary (X:Type) (A B : Prop) (R : X -> X -> Prop) : 
+Lemma oplus_nullary (X : Type) (A B : Prop) (R : X -> X -> Prop) : 
  almost_full R ->
  forall C, (forall x y, R x y <-> C x y \/ A) ->
  almost_full (fun (x:X) (y:X) => C x y \/ B) ->
@@ -62,7 +56,7 @@ left. left. apply H3. right. right. apply H3.
 Defined.
 
 (* OplusNullaryCor *)
-Lemma oplus_nullary_cor (X:Type) (A B : Prop) (C : X -> X -> Prop) : 
+Lemma oplus_nullary_cor (X : Type) (A B : Prop) (C : X -> X -> Prop) : 
   almost_full (fun x y => C x y \/ A) -> 
   almost_full (fun x y => C x y \/ B) -> 
   almost_full (fun x y => C x y \/ (A /\ B)).
@@ -72,7 +66,7 @@ apply H. auto. intros. firstorder. apply H0.
 Defined.
 
 (* OplusUnaryLemma *)
-Lemma oplus_unary (X:Type) (A B : X -> Prop):
+Lemma oplus_unary (X : Type) (A B : X -> Prop):
   forall R, almost_full R -> 
   forall T, almost_full T -> 
   forall C, (forall x y, R x y -> C x y \/ A x) -> 
@@ -128,7 +122,7 @@ intros R afR. induction afR.
 Defined.
 
 (* OplusUnaryCor *)
-Lemma oplus_unary_cor (X:Type) (A B : X -> Prop) (C : X -> X -> Prop):
+Lemma oplus_unary_cor (X : Type) (A B : X -> Prop) (C : X -> X -> Prop):
  almost_full(fun x y => C x y \/ A x) ->
  almost_full(fun x y => C x y \/ B x) -> 
  almost_full (fun x y => C x y \/ (A x /\ B x)).
@@ -138,7 +132,7 @@ apply H. apply H0. intros. apply H1. intros. apply H1.
 Defined.
 
 (* OplusBinaryLemma *)
-Lemma oplus_binary (X:Type):
+Lemma oplus_binary (X : Type):
   forall A, almost_full A -> 
   forall B, almost_full B -> 
    @almost_full X (fun x y => A x y /\ B x y).
@@ -163,7 +157,7 @@ intros. destruct H3. destruct H4. left. auto. right. auto.
 Defined.
 
 (* AfIntersection *)
-Corollary af_intersection (X:Type) (A B :X->X->Prop):
+Corollary af_intersection (X : Type) (A B :X->X->Prop):
   almost_full A -> almost_full B -> 
   almost_full (fun x y => A x y /\ B x y).
 Proof.
@@ -343,9 +337,11 @@ Definition lift_pointwise n X (R : X -> X -> Prop) :=
 (* LeqAF *)
 Lemma leq_af : almost_full le.
 Proof.
-assert (almost_full (fun x y => not (y < x))).
-apply af_from_wf. apply lt_wf. unfold dec_rel.
-intros. destruct (le_lt_dec x y). left; lia. right; assumption.
+assert (almost_full (fun x y => ~ y < x)). {
+  apply af_from_wf. apply lt_wf. unfold dec_rel.
+  intros. destruct (le_lt_dec x y).
+  left; lia. right; assumption.
+}
 apply (af_strengthen H). intros. lia.
 Defined.
 

@@ -48,13 +48,25 @@ Theorem, useful for proving termination.
 - Related publication(s):
   - [Stop When You Are Almost-Full](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.225.3021&amp;rep=rep1&amp;type=pdf) doi:[10.1007/978-3-642-32347-8_17](https://doi.org/10.1007/978-3-642-32347-8_17)
 
-## Building instructions
+## Building and installation instructions
+
+The easiest way to install the latest released version of Almost Full
+is via [OPAM](https://opam.ocaml.org/doc/Install.html):
+
+```shell
+opam repo add coq-released https://coq.inria.fr/opam/released
+opam install coq-almost-full
+```
+
+To instead build and install manually, do:
 
 ``` shell
-git clone https://github.com/coq-community/almost-full
+git clone https://github.com/coq-community/almost-full.git
 cd almost-full
-make   # or make -j <number-of-cores-on-your-machine>
+make   # or make -j <number-of-cores-on-your-machine> 
+make install
 ```
+
 
 ## Documentation
 
