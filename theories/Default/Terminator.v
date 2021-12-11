@@ -1,11 +1,5 @@
-From Coq Require Import Wf_nat.
-From Coq Require Import Arith.
-From Coq Require Import Wellfounded.
-From Coq Require Import List.
 From Coq Require Import Relations.
-
 From AlmostFull.Default Require Import AlmostFull.
-From AlmostFull.Default Require Import AlmostFullInduction.
 From AlmostFull.Default Require Import AFConstructions.
 
 Set Implicit Arguments.

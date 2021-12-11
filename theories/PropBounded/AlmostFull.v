@@ -1,8 +1,4 @@
-From Coq Require Import Wf_nat.
-From Coq Require Import Arith.
-From Coq Require Import Wellfounded.
-From Coq Require Import List.
-From Coq Require Import Relations.
+From Coq Require Import Arith Relations.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -177,4 +173,3 @@ apply IHclos_trans_1n.
 assumption. firstorder. firstorder.
 assumption.
 Defined.
-
