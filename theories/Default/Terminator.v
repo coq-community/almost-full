@@ -17,7 +17,7 @@ Lemma disjunctive_wf :
   well_founded T.
 Proof.
 intros A T R1 R2 decR1 decR2 wfR1 wfR2 Hincl.
-pose (R x y := not (R1 y x) /\ not (R2 y x)).
+pose (R x y := ~ R1 y x /\ ~ R2 y x).
 assert (almost_full R) as Raf.
   apply af_intersection. 
   apply (af_from_wf wfR1 decR1).

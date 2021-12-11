@@ -13,7 +13,7 @@ Set Transparent Obligations.
 
 (* Decidable *)
 Definition dec_rel (X:Type) (R:X->X->Prop) :=
-  forall x y, {not (R y x)} + {R y x}.
+  forall x y, {~ R y x} + {R y x}.
 
 (* AF *)
 Inductive almost_full X : (X -> X -> Prop) -> Prop :=
@@ -70,7 +70,7 @@ Defined.
 (* AfTreeIter *)
 Lemma af_iter : forall (X:Type) (R : X -> X -> Prop) 
  (decR : dec_rel R) (x:X) (accX : Acc R x),
- almost_full (fun y z => not (R y x) \/ not (R z y)).
+ almost_full (fun y z => ~ R y x \/ ~ R z y).
 Proof.
 intros.
 induction accX.
@@ -86,7 +86,7 @@ Defined.
 
 (* AfFromWfCor *)
 Corollary af_from_wf (X:Type) (R : X -> X -> Prop) : 
-  well_founded R -> dec_rel R -> almost_full (fun x y => not (R y x)).
+  well_founded R -> dec_rel R -> almost_full (fun x y => ~ R y x).
 Proof.
 intros. 
 apply AF_SUP. intro x.
@@ -159,7 +159,7 @@ Defined.
 (* WfFromWqo *)
 Lemma wf_from_wqo : 
   forall (X:Type) (R : X -> X -> Prop), transitive X R -> almost_full R -> 
-  well_founded (fun x y => R x y /\ not (R y x)).
+  well_founded (fun x y => R x y /\ ~ R y x).
 Proof.
 intros X R trH afR.
 apply wf_from_af with (R := R).

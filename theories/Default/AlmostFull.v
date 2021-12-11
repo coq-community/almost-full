@@ -14,7 +14,7 @@ Set Transparent Obligations.
 
 (* Decidable *)
 Definition dec_rel (X:Type) (R:X->X->Prop) := 
-  forall x y, {not (R y x)} + {R y x}.
+  forall x y, {~ R y x} + {R y x}.
 
 (* WFT *)
 Inductive WFT (X : Type) : Type := 
@@ -23,7 +23,7 @@ Inductive WFT (X : Type) : Type :=
 
 (* SecureBy *)
 Fixpoint SecureBy (X:Type) (A : X->X->Prop) (p : WFT X) : Prop := 
- match p with 
+ match p with
  | ZT _ => forall x y, A x y
  | SUP p => 
      forall x, SecureBy (fun y z => A y z \/ A x y) (p x)
@@ -170,7 +170,7 @@ Defined. (* Not Qed because we want to compute with it *)
 Lemma secure_from_wf :
  forall (X:Type) (R : X -> X -> Prop) 
  (wfR : well_founded R) (decR : dec_rel R),
- SecureBy (fun x y => not (R y x)) 
+ SecureBy (fun x y => ~ R y x)
           (SUP (af_tree wfR decR)).
 Proof.
 intros. rewrite sup_rewrite.
@@ -191,7 +191,7 @@ Defined. (* Not Qed because we want to compute with it *)
 (* AfFromWfCor *)
 Corollary af_from_wf (X:Type) (R : X -> X -> Prop) : 
   well_founded R -> 
-  dec_rel R -> almost_full (fun x y => not (R y x)).
+  dec_rel R -> almost_full (fun x y => ~ R y x).
 Proof.
 intros wfR decR. unfold almost_full.
 exists (SUP (af_tree wfR decR)).
@@ -275,7 +275,7 @@ Defined.
 Lemma wf_from_wqo : 
   forall (X:Type) (p : WFT X) (R : X -> X -> Prop), 
          transitive X R -> SecureBy R p -> 
-         well_founded (fun x y => R x y /\ not (R y x)).
+         well_founded (fun x y => R x y /\ ~ R y x).
 Proof.
 intros.
 apply wf_from_af with (R := R) (p := p). 
