@@ -6,7 +6,7 @@ community: true
 action: true
 nix: true
 coqdoc: false
-dune: true
+dune: false
 doi: 10.1007/978-3-642-32347-8_17
 
 synopsis: >-
@@ -43,10 +43,11 @@ license:
 
 supported_coq_versions:
   text: 8.10 or later
-  opam: '{(>= "8.10" & < "8.15~") | (= "dev")}'
+  opam: '{(>= "8.10" & < "8.16~") | (= "dev")}'
 
 tested_coq_nix_versions:
 - coq_version: 'master'
+- coq_version: 'v8.15'
 
 tested_coq_opam_versions:
 - version: dev
@@ -66,15 +67,6 @@ keywords:
 
 categories:
 - name: Computer Science/Data Types and Data Structures
-
-build: |-
- ## Building instructions
-
- ``` shell
- git clone https://github.com/coq-community/almost-full
- cd almost-full
- make   # or make -j <number-of-cores-on-your-machine>
- ```
 
 documentation: |-
   ## Documentation
