@@ -113,12 +113,14 @@ Lemma le_tree_rewrite_aux :
   forall n x, n > x -> ltree_aux n x = le_tree x.
 Proof.
 intro n. induction n. intros. inversion H.
-intros. destruct (gt_S _ _ H). simpl. 
+intros. 
+destruct ((proj1 (Nat.lt_eq_cases _ _)) (proj2 (Nat.succ_le_mono _ _) H)).
+simpl.
 unfold le_tree. simpl. apply sup_eq. 
-apply functional_extensionality. intro y. 
+apply functional_extensionality. intro y.
 destruct (le_lt_dec x y). auto. 
 apply aux_le_tree_aux. lia. lia.
-rewrite H0. unfold le_tree. reflexivity. 
+rewrite H0. unfold le_tree. reflexivity.
 Qed.
 
 Lemma le_tree_rewrite : forall (x:nat),
