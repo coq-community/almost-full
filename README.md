@@ -42,7 +42,7 @@ Theorem, useful for proving termination.
 - Coq-community maintainer(s):
   - Karl Palmskog ([**@palmskog**](https://github.com/palmskog))
 - License: [MIT License](LICENSE)
-- Compatible Coq versions: 8.10 or later
+- Compatible Coq versions: 8.11 or later
 - Additional dependencies: none
 - Coq namespace: `AlmostFull`
 - Related publication(s):

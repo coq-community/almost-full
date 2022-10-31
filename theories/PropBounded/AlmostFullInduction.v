@@ -321,8 +321,8 @@ destruct kx.
   assert (k-1 < k). lia.
   intros. apply (X0 (@FinIntro k (k-1) H0,y)). simpl. 
   unfold lift_diag. unfold fst. unfold snd. split. unfold next_fin. lia. apply H.
-  (* Now it is an (S kx) *) 
-  assert (kx < k). intuition; lia.
+  (* Now it is an (S kx) *)
+  assert (kx < k). intuition auto; lia.
   intros. apply (X0 (@FinIntro k kx H0,y)). simpl. unfold lift_diag. simpl. split. 
   simpl. unfold next_fin. right. intuition lia. apply H.
 (* Show the goal *)
