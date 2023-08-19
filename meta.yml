@@ -6,7 +6,7 @@ community: true
 action: true
 nix: true
 coqdoc: false
-dune: false
+dune: true
 doi: 10.1007/978-3-642-32347-8_17
 
 synopsis: >-
@@ -43,13 +43,15 @@ license:
 
 supported_coq_versions:
   text: 8.11 or later
-  opam: '{(>= "8.11" & < "8.17~") | (= "dev")}'
+  opam: '{>= "8.11"}'
 
 tested_coq_nix_versions:
 - coq_version: 'master'
 
 tested_coq_opam_versions:
 - version: dev
+- version: '8.18'
+- version: '8.17'
 - version: '8.16'
 - version: '8.15'
 - version: '8.14'
